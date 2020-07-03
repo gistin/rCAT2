@@ -1,0 +1,24 @@
+---
+title: "rCAT"
+author: "Justin Moat"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rCAT)
+```
+### rCAT: Conservation Assessment Tools
+
+[Please open this pdf for an introduction to this package](https://github.com/gistin/rCAT1/blob/master/vignettes/rCAT.pdf)
