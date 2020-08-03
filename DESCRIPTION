@@ -1,6 +1,6 @@
 Package: rCAT
 Title: Conservation Assessment Tools
-Version: 0.1.6
+Version: 0.2.0
 Authors@R: c(person(given = "Justin",
            family = "Moat",
            role = c("aut", "cre"),
@@ -11,11 +11,11 @@ Authors@R: c(person(given = "Justin",
            role = c("ctb"),
            email = "S.Bachman@kew.org",
            comment = c(ORCID = "")))
-Depends: R (>= 3.3.0)
+Depends: R (>= 3.3.0),
 Suggests: rgeos, rgbif (>= 0.9.2), knitr,rmarkdown, R.rsp,testthat,spelling
 Description: A set of tools and functions to help with species conservation assessments (Red List threat assessments). Includes Extent of occurrence, Area of Occupancy, Minimum Enclosing Rectangle, a geographic Projection Wizard and Species batch processing.
 License: MIT + file LICENSE
-Imports: pracma (>= 1.9.5), rgdal (>= 1.2-5), sp (>= 1.2-3), grDevices (>= 3.3.2)
+Imports: pracma (>= 1.9.5), rgdal (>= 1.2-5), sf (>= 0.9-5), grDevices (>= 3.3.2), ggplot2 
 Encoding: UTF-8
 LazyData: true
 Language: en-US

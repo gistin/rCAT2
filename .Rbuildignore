@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 extdata
 README.md
+^data-raw$
+^examplescripts$

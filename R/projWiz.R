@@ -1,10 +1,10 @@
 ###########################################################
 #Simple area Projection Wizard
 ###########################################################
-#' Simple equal area projection wizard
 #' @title Simple Projection Wizard
 #' @description 
-#' Projects any set of lat long points to a "suitable" area projection, based on it's "true centre of gravity"
+#' Projects any set of lat long points to a "suitable" area projection, based on it's "true center of gravity" or user defined lat long.
+#' Data is expect as lat long in decimal degrees and returned in metres.
 #' @author Justin Moat. J.Moat@kew.org
 #' @note
 #' Based around a simple continental projection, using two sets of projections
@@ -12,60 +12,66 @@
 #' equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area
 #'  
 #' note these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal analysis
-#' See below for a more cartographically pleasing projection engine
+#' See Šavric et al for a more cartographically pleasing projection engine
 #' 
 #' Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938
-#' @param thepoints set of points in latitude and longtitude ie c(lat,long)
-#' @param thecentre one point ie c(lat,long)
-#' 
-#' @return set of points in metres (x,y)
+#' @param thepoints set of points as a dataframe with latitude and longitude 
+#' @param thecentre one point i.e. c(lat,long), if not specified this will be calculated from the center of gravity of all points
+#' @param returnV switches to return either  dataframe (x,y) or simple feature of points  
+#' S = simple, returns as dataframe of x,y
+#' SF = simple feature of points
+#' @return Defaults is Set of points in meters as a dataframe with projection details attributed (stored as crs to retrieve attr(myprojectedpoints,'crs'))
 #' @examples 
 #'lat <- runif (200,-24,-12)
 #'long <- runif (200,43,51)
 #'ll <- data.frame(lat,long)
-#'cp <- trueCOGll(ll)
-#'pointsprojected <- simProjWiz(ll,cp)
+#'#let it choose the centre point from your set of points
+#'pointsprojected <- simProjWiz(ll)
+#'#using your own set of points
+#'pointsprojected <- simProjWiz(ll,c(-18,47))
+#'#check projection returned
+#'attr(pointsprojected,'crs')
+#'#return a simple features
+#'sf_points <- simProjWiz(ll,,"SF")
+#'ppoints <- simProjWiz(ll,,"SF")
+#'
 #' @references 
 #' Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938
+#' https://projectionwizard.org
 #' 
 #' Snyder, J.P., 1987. Map projections: A working manual, Professional Paper. Washington, D.C.
 #' @export
-#' @import sp
+#' @import sf
 #' @import rgdal
+#' 
+#' 
 
 
-
-######################################################################
-#simple projection wizard#
-######################################################################
-#determining projection around on center of points
-#based around a simplied continental scheme. Also see:
-#Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 
-#1–9. doi:10.1080/00087041.2015.1131938
-#two sets of projections
-#equal area cylindrical = Cylindrical equal-area = 8287
-#equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area = 
-#note these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal analysis
-######################################################################
-
-
-simProjWiz <- function(thepoints,thecentre){
-  #setup and set projection to WGS84
-  coordinates(thepoints) <- c("long", "lat")
-  proj4string(thepoints) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") # geographic and WGS 84
-  #depending on centre point
-  if((thecentre$lat < 70) & (thecentre$lat > -70)){
-    CRSstring <- paste("+proj=cea +lon_0=", thecentre$long,   " +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",sep = "")
-  } else {
-    CRSstring <- paste("+proj=laea +lat_0=", thecentre$lat," +lon_0=", thecentre$long, " +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",sep = "")
+simProjWiz <- function(thepoints,thecentre,returnV="S"){
+  #check dataframe is sensible
+  llCheck(thepoints)
+  #names(thepoints) <- c("long", "lat")
+  #
+  if (missing(thecentre)){
+    thecentre <- trueCOGll(thepoints)
   }
-  CRS.new <- CRS(CRSstring)
+  #setup and set projection to WGS84
+  thepoints <- st_as_sf(thepoints, coords = c("long", "lat"), crs = 4326)
+  #depending on centre point, choose projection
+  if((thecentre[1] < 70) & (thecentre[1] > -70)){
+    CRSstring <- paste("+proj=cea +lon_0=", thecentre[2],   " +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",sep = "")
+  } else {
+    CRSstring <- paste("+proj=laea +lat_0=", thecentre[1]," +lon_0=", thecentre[2], " +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",sep = "")
+  }
+  CRS.new <- st_crs(CRSstring)
   #reproject
-  xysp <- spTransform(thepoints, CRS.new)
-  xy <- as.data.frame(xysp)
-  #rename to x and y as not longer lat long
-  colnames (xy) <- c("x","y")
-  return(xy)
+  xysp <- st_transform(thepoints, CRS.new)
+  if(returnV=="SF"){return (xysp)}
+  else {
+    xy <- as.data.frame(st_coordinates(xysp))
+    attr(xy,'crs') <- CRSstring
+    return(xy)
+  }
 }
 
 ######################################################################
@@ -96,14 +102,7 @@ trueCOGll <-function(thepoints){
   pmprll <- cart2ll(pmp$x,pmp$y,pmp$z) #to ll in radians
   pmpll <- rad2deg(pmprll) #to degrees
   return(data.frame(lat=pmpll$latr,long=pmpll$longr))
-  
 }
-
-
-
-
-
-
 
 ######################################################################
 #calculates the Cartesian cordinates (x,y,z) from lat long in radians#
@@ -159,17 +158,17 @@ cart2ll <-function (x,y,z){
 ######################################################################
 #' @title Cartesian coordinate projection
 #' @description 
-#' calculates Cartesian (x,y,z), projected from the centre of the sphere 
-#' to the earth surface, returns cartesian (x,y,z)
-#' used to calculate "true" centre of set of lat longs
+#' Used as part of the projection wizard, calculates Cartesian (x,y,z), projected from the centre of the sphere to the earth surface, returns cartesian (x,y,z)
 #' @author Justin Moat. J.Moat@kew.org
 #' @note
 #' http://stackoverflow.com/questions/9604132/how-to-project-a-point-on-to-a-sphere
+#' 
 #' @param x East to West coordinate in metres
 #' @param y South to North coordinate in metres
 #' @param z height coordinate in metres
 #' @return x,y,z
-#' @references Descartes, R., 1637. Discours de la methode. A Leyde, De l’imprimerie de I. Maire, Paris.
+#' @references 
+#' Descartes, R., 1637. Discours de la methode. A Leyde, De l’imprimerie de I. Maire, Paris.
 #' @export
 
 pro2sph <- function (x,y,z){
@@ -212,3 +211,59 @@ rad2deg <- function(rad) {(rad * 180) / (pi)}
 #' @export
 
 deg2rad <- function(deg) {(deg * pi) / (180)}
+
+######################################################################
+#Crude dataframe check for sensible latitude and longtitude data
+######################################################################
+#' @title 
+#' Check point data and lat long's are sensible
+#' @description 
+#' Checked the dataframe for NA, latitude below -90 or above 90, longitude below -180 and above 180, also warns if it finds whole numbers or 0
+#' @author Justin Moat. J.Moat@kew.org
+#' @param thepoints set of points as a dataframe with latitude and longitude 
+#' @return nothing or warning or error
+#' @examples 
+#' # build dataframe
+#' lat <- runif (200,-24,-12)
+#' long <- runif (200,43,51)
+#' llp <- data.frame(lat,long)
+#' #add some odd data
+#' llp[1:10,] <- c(10,10)
+#' llp[11:100,] <- c(0,0)
+#' #below will return two warnings
+#' llcheck(llp)
+#' llp[101,]<- NA
+#' #below will return an error
+#' llcheck(llp)
+#' llp[101,]<- c(1000,-20)
+#' #below will return an error
+#' llcheck(llp)
+#' llp[101,]<- c(-20,1000)
+#' #below will return an error
+#' llcheck(llp)
+
+llCheck <- function(thepoints){
+  if(is.null(thepoints$lat) | is.null(thepoints$long)){
+    stop("data should be in lat long ie with field names lat long")
+  }
+  if (lapply(thepoints,function(x) any(is.na(x)))$lat | lapply(thepoints,function(x) any(is.na(x)))$long ){
+    stop("NA withing you data, please remove any NA")
+  }
+  if(any(thepoints$lat < -90) | any(thepoints$lat > 90)){
+    stop("-90 < lat > 90, latitude not within sensible limits")
+  }
+  if(any(thepoints$long < -180) | any(thepoints$long > 180)){
+    stop("-180 < long > 180, longtitude not within sensible limits")
+  }
+  pwhole <- sum(round(thepoints) == thepoints)/(nrow(thepoints) * ncol(thepoints))
+  if (pwhole > 0.1){
+    warning(paste (pwhole*100, "% of your points are whole numbers, as you sure they are in lat long?"), call. = FALSE)
+  }
+  pzero <- sum(thepoints == 0)/(nrow(thepoints) * ncol(thepoints))
+  if (pzero > 0){
+    warning(paste (pzero*100, "% of your points have 0 lat or long, are these true lat longs or no data, if no data then remove?"), call. = FALSE)
+  }
+}
+
+
+

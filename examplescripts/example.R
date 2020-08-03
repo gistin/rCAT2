@@ -1,0 +1,215 @@
+############################
+#introductory examples
+###########################
+
+#Prepare your data
+#In this case we'll make some data for Cyprus
+library(rCAT)
+library(sf)
+library(ggplot2)
+Cyprus <-   tdwg3[tdwg3$LEVEL3_COD=="CYP",]
+pts <- as.data.frame(st_coordinates(st_sample(Cyprus,29)))
+#set names to lat long
+names(pts) <- c('long','lat')
+#simple plot of this
+ggplot(data=Cyprus) + geom_sf() + geom_point(data=pts,aes(long,lat))
+#project your points into something useful i.e. not lat long
+#project and center point are automatically set by the wizard
+#you can set the center your self ie propts <- simProjWiz(pts,c(33.25,34),returnV='S')
+##TD seems to set lat_ts = 0 it should be the centre or maybe not check original reference, I don't think it matters for equatorial projections, as it's just a shift
+thepoints <- simProjWiz(pts,returnV='S')
+thepointsSF <- simProjWiz(pts,returnV='SF')
+#check project details are stored
+attr(thepoints,'crs')
+#lets check the EOO, it should be approximately the area of Cyprus's ~ 9,000 km2
+eoo(thepoints)
+#plot this
+eeoploy <- eoo(thepoints,"SF")
+cplot <- ggplot(data=Cyprus) + geom_sf() + geom_sf(data=thepointsSF) + geom_sf(data=eeoploy,fill=NA,col='green')
+#EOO rating
+eooRating(eoo(thepoints))
+#get AOO should be ~ 116 km2
+aoo(thepoints)
+#get AOO as cell polygons
+aoopolys <- aoo(thepoints,2000,"SF")
+#plot it
+eooaooplot <- cplot + geom_sf(data=aoopolys,fill=NA,col='red')
+eooaooplot
+#get rating from aoo
+aooRating(aoo(thepoints),FALSE)
+
+#interested in change in AOO or EOO?
+1-aooFixedGrid(thepoints[1:22,])/aooFixedGrid(thepoints)
+1-eoo(thepoints[1:22,])/eoo(thepoints)
+
+#how about the alpha hull? the default is to drop triangles with 2x the mean
+aHullMean(thepoints)
+#plotting it with 1.5 x mean
+apoly = aHullMean(thepoints,1.5,'SF')
+cplot + geom_sf(data=apoly,fill=NA,col='blue')
+#want to see the detail of the triangles in the Alpha hull?
+cplot + geom_sf(data=aHullMean(thepoints,returnV = 'ALL'),fill=NA,col='blue')
+
+#######################################################
+#getting down to some detailed analysis for AOO and EOO
+#######################################################
+#build some data
+
+#Build some normally distributed point data around the Troodos mountains ~ 10 km diametre
+thepoints <- normalofPs(29,0.1)
+#TODO maybe think about make all upper case as SF objects???
+#shift to Troodos mountaions
+thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
+#check to see where they are on a map
+ggplot(data=Cyprus) + geom_sf() + geom_point(data=thepoints,aes(long,lat))
+#project the points
+ppts <- simProjWiz(thepoints)
+##check crs
+attr(ppts,'crs')
+
+####################
+#AOO default
+####################
+#standard AOO
+aoo(ppts)
+simpleaoopoly <- aoo(ppts,returnV = "SF")
+myplot <- ggplot(data=simpleaoopoly) + geom_sf() + geom_point(data=ppts,aes(X,Y))
+myplot
+
+####################
+#AOO with shift only
+####################
+#getting minimum AOO, but only by shifting
+minfixaoo <- aooFixedGrid(ppts,returnV = "SF")
+myplot + geom_sf(data=minfixaoo, fill="#00FF0044",colour='green')
+#interested in all the AOO results to see the range
+aoofixall <- aooFixedGrid(ppts,returnV = "ALL")
+range(aoofixall$nofcells)
+ggplot(data=aoofixall) + geom_histogram(aes(nofcells))
+
+#want to review the maximum grid for fun?
+maxgrid <- aoofixall[which.max(aoofixall$nofcells),]
+#we need to build the cells from the points, rotation and shifts
+maxpoly <- buildCellPolys_rxy(ppts,2000,maxgrid$rotation,maxgrid$xshift,maxgrid$yshift)
+#plot it
+myplot + geom_sf(data=maxpoly, fill="#FF000044",colour='red')
+#OK it was not that much fun, but you get the idea
+#report
+paste("Default grid give", nrow(simpleaoopoly), "cells. Minimum grid gave", nrow(minfixaoo), "cells Whilst max grid gave", nrow(maxpoly),"cells")
+
+############################
+#AOO with shift and rotation
+############################
+#OK lets look at AOO but with rotation as well
+#Also this method is more systematic so AOO range and histograms are statistically more meaningful
+#just get the area
+aooFixedRotation(ppts)
+#return the polygon
+minpoly <- aooFixedRotation(ppts,returnV="SF")
+myplot + geom_sf(data=minpoly, fill="#00FF0044",colour='green') 
+#review the range of results
+allresults <- aooFixedRotation(ppts,returnV="ALL")
+ggplot(data=allresults) + geom_histogram(aes(nofcells))
+#you can pull out any results from the dataframe and review
+#here we will look at one of the maximum AOO
+maxgrid <- allresults[which.max(allresults$nofcells),]
+maxpolyrot <- buildCellPolys_rxy(ppts,2000,maxgrid$rotation,maxgrid$xshift,maxgrid$yshift)
+myplot + geom_sf(data=maxpolyrot, fill="#FF000044",colour='red')
+
+#let push it harder to find a smaller combination if possible. Increasing iteration by 10x will take a good 10+ seconds to run
+minpolyall <- aooFixedRotation(ppts,2000,12960,returnV = "ALL")
+#Looks like we can squeeze out one extra cell, not sure it was worth it!
+# plot the min and max
+maxgrids <- minpolyall[which.max(minpolyall$nofcells),]
+mingrids <- minpolyall[which.min(minpolyall$nofcells),]
+maxpolyrots <- buildCellPolys_rxy(ppts,2000,maxgrids$rotation,maxgrids$xshift,maxgrids$yshift)
+minpolyrots <- buildCellPolys_rxy(ppts,2000,mingrids$rotation,mingrids$xshift,mingrids$yshift)
+ggplot (data=maxpolyrot) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=minpolyrots, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
+
+#report
+paste("first iterations gave", nrow(minpoly),". Second with xten iterations gave", nrow(minpolyrots),". Max was", nrow(maxpolyrots))
+
+###############################
+#EOO
+###############################
+eoo(ppts)
+
+###############################
+#EOO with point error
+###############################
+
+#Looking at EOO with error incorporated
+#same data but with a content error of 1km
+#report area
+eooMin(ppts,defaultRadius = 1000)
+eoopolys <- eooMin(ppts,defaultRadius = 1000, returnV="SFA")
+ggplot (data=eoopolys$max) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
+#report, note getting area from st_area which is in m2
+paste("Standard EOO:", eoo(ppts), "Min EOO:",st_area(eoopolys$min)/1000000,"Max EOO:",  st_area(eoopolys$max)/1000000)
+
+#and with some variable error ratings between 0 and 3 km
+errorv <- runif (nrow(ppts),0,3000)
+ppts$error <- errorv
+eoopolys <- eooMin(ppts,errorfield = "error",returnV="SFA")
+
+#build the buffers so we can see the error circles on our plots
+ps <- st_as_sf(ppts,coords=c('X','Y'))
+psbuff <- st_buffer(ps,ps$error)
+#need to set the projection
+st_crs(psbuff) <- st_crs(attr(ppts,'crs'))
+
+ggplot (data=eoopolys$max) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
+
+#############################
+#point building scripts
+#used for testing and simulations
+#############################
+#TD need to update points makings scripts to delivery X Y not x y
+#random square of points
+plot(squareOfPs(500,1000),asp=1)
+#random oval of points
+plot(ovalOfPs(500,1000,0.78,0.5),asp=1)
+#Doughnut of points
+plot(doughnutOfPs(500,1000,0.6,0.5,0.4),asp=1)
+# Normally disturbed (but random within) set of points
+plot(normalofPs(500,1000),asp=1)
+#rotating points, mainly used for AOO, but maybe useful to others
+thepoints <- squareOfPs(200,0.1)
+rpoints <- rotateP(thepoints,deg2rad(45))
+plot(rpoints,asp=1)
+
+#############################
+#Scripts not used yet
+#############################
+#Distance of the longest Axis Willis et al 2003 suggest 1/10 as possible grid/scale size
+longestAxis(ppts)
+dp <- longestAxis(ppts,'P')
+plot(x=ppts$X,y=ppts$Y, asp=1)
+points(dp,pch=16)
+
+#Minimum enclosing rectangle = simple metric for area
+mer(ppts)
+
+#############################
+#Batch processing examples
+############################
+#getting batch working
+#set up simple data within Cyprus
+lat <- runif (200,32.8294,32.9394)
+long <- runif (200,34.8720,34.9720)
+mydata <- data.frame(taxa=c('aa','bb','cc','dd',"xx"),lat,long)
+
+#default get a dataframe of results and project all with the same project
+resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat)
+#project each species individually
+resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,project2gether = FALSE)
+#switch on aooMin
+resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
+#default to return Simple feature objects
+resultsf <- conBatch(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
+
+#plot all the EOO results
+ggplot(data=resultsf[resultsf$geom_cat=="eoo",]) + geom_sf(fill=NA)
+#pullone species and plot
+oneSp <- resultsf[resultsf$taxa=="aa",]
+ggplot(data=oneSp) + geom_sf(fill=NA)

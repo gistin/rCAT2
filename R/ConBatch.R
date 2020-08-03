@@ -1,11 +1,13 @@
+#NB just reset to new calls only
+
 ###########################################################
-#Simple fuction to process multiple species #
+#Simple function to process multiple species #
 ###########################################################
 #' @title Batch process, preliminary conservation assessments
 #' @description 
-#' Combines all of routines in rCAT to process multiple species for AOO, EOO etc.
+#' Combines the main of routines in rCAT to process multiple species for AOO, EOO etc.
 #' @author Justin Moat. J.Moat@kew.org
-#' @note Has a switch to either project all data as a whole or each taxa separately. I would suggest you use this switch if data is all from a simlar area (i.e. all from one country/region)
+#' @note Has a switch to either project all data as a whole or each taxa separately. I would suggest you use this switch if data is all from a similar area (i.e. all from one continent/country/region)
 #' @details This function expects a list of taxa and latitudes and longitudes.ie\cr
 #' \tabular{lll}{
 #' species_w \tab 85.388000  \tab   84.33100\cr 
@@ -21,27 +23,40 @@
 #' @param taxa field which defines a list of species or taxa
 #' @param lat field which defines the latitude set of points
 #' @param long field which defines the longtitude set of points
-#' @param cellsize cell length in metres used to for AOO projection N.B. IUCN recommend 2000 m (ie 2 km)
-#' @param project2gether TRUE or FALSE, TRUE all data is projected together using the centre of all latitudes and longtitudes. FALSE each species is projected separately. Default = FALSE
-#' @seealso \code{\link{MER}} for Minimum Enclosing Rectangle calculations, \code{\link{EOOarea}} for EOO calculations, \code{\link{EOORating}} for EOO Ratings, \code{\link{AOOsimp}} for AOO calculations, \code{\link{AOORating}} for AOO Ratings,
+#' @param project2gether TRUE or FALSE, TRUE all data is projected together using the centre of all latitudes and longitudes. FALSE each species is projected separately. Default = TRUE
+#' @param cellsize cell length in metres used to for AOO projection N.B. IUCN recommend 2000 m (default 2000)
+#' @param aooMin calls the aooMin routines as well as simple aoo, bewarned with lots of species this can take some time to run (default=FALSE)
+#' @param it if aooMin=TRUE this determins the number of iterations it will run to find aooMin
+#' @param returnV switches to return different sets of results: 
+#' S = simple returns a dataframe of results = (taxa ,Number of points,EOO in km2, Simple AOO in km2,Minimum AOO, EOO category, AOOcategory, Cellwidth, projection parameters)
+#' SF = simple features dataframe will all results, taxa in taxa field, geometryclass=(EOO,AOO,points). NB all points will be projected together and aooMin is ignored
 #' 
-#' @return dataframe with; taxa ,Number of points, Area of the enclosing recetangle, EOO Area in km2, AOO area in km2, EOO IUCN category, AOO IUCN category\cr
-#' \tabular{llllllll}{
-#'  \tab      taxa\tab  NOP\tab              MER\tab           EOOkm2\tab AOO2km\tab EOOcat\tab AOOcat\cr
-#' 1 \tab species x \tab  14 \tab 918562.259811711 \tab 585915.607417865 \tab     14 \tab     LC\tab     EN\cr
-#' 2 \tab species y \tab 124 \tab 1717224.64389286 \tab 634149.482670821  \tab  124   \tab  LC  \tab   EN\cr
-#' 3 \tab species z \tab  61 \tab 22622717.2314339 \tab 17839113.1220552  \tab   61   \tab  LC  \tab   EN\cr
-#' 4 \tab species w \tab 1130 \tab 509390660.388499 \tab 506445176.073246 \tab  1130  \tab   LC \tab    VU\cr}
 #' 
 #' 
 #' @examples
-#' lat <- runif (200,-24,-12)
-#' long <- runif (200,43,51)
-#' spa <- rep('aa',50)
-#' spb <- rep('bb',150)
-#' mydata <- data.frame(species=c(spa,spb),lat,long)
-#' resultsdf <- ConBatch(mydata$species,mydata$lat,mydata$long,2000,FALSE)
+#' 
+#' #getting batch working
+#'#set up simple data within Cyprus
+#'lat <- runif (200,32.8294,32.9394)
+#'long <- runif (200,34.8720,34.9720)
+#'mydata <- data.frame(taxa=c('aa','bb','cc','dd',"xx"),lat,long)
 #'
+#'#default get a dataframe of results and project all with the same project
+#'resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat)
+#'#project each species individually
+#'resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,project2gether = FALSE)
+#'#switch on aooMin
+#'resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
+#'
+#'#default to return Simple feature objects
+#'resultsf <- conBatch(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
+#'#plot all the EOO results
+#'library(ggplot2)
+#'ggplot(data=resultsf[resultsf$geom_cat=="eoo",]) + geom_sf(fill=NA)
+#'#pullone species and plot
+#'oneSp <- resultsf[resultsf$taxa=="aa",]
+#'ggplot(data=oneSp) + geom_sf(fill=NA)
+
 #' @references 
 #' Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., 2011. Supporting Red List threat assessments with GeoCAT: geospatial conservation assessment tool. Zookeys 126, 117–26. doi:10.3897/zookeys.150.2109 
 #' 
@@ -51,6 +66,92 @@
 #' 
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 #' @export
+
+batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALSE,it=1296, returnV='S'){
+  #taxa <- mydata$taxa
+  #long <- mydata$long
+  #lat <- mydata$lat
+  #project2gether=FALSE
+  
+  #project all either when specified of when returning sf's
+  if(project2gether || returnV=="SF"){
+    mypointsxy <- simProjWiz(data.frame(lat,long))
+    mypointsxy$taxa <- taxa
+  } else {
+    mypointsll <- data.frame(taxa,lat,long)
+  }
+  #taxa list for loop
+  taxalist <- unique(taxa)
+  
+  #return SF if asked for
+  if(returnV=='SF'){
+    resultsf <- st_sf(st_sfc(crs = attr(mypointsxy,'crs')))  
+    for (thetaxa in taxalist){
+      #project one at a time
+      ppts <- mypointsxy[mypointsxy$taxa==thetaxa,]
+      ppts <- ppts[1:2]
+      attr(ppts,'crs') <- attr(mypointsxy,'crs')
+      #do the work
+      eoopoly <- eoo(ppts,"SF")
+      aoopolys <- aoo(ppts,cellsize,"SF")
+      #build the points
+      mpts = st_sf(geometry = st_sfc(st_multipoint(data.matrix(ppts))), crs = attr(mypointsxy,'crs'))
+      eoopoly$geom_cat <- "eoo"
+      aoopolys$geom_cat <- "aoo"
+      #setup the points data so it matches above
+      mpts$geom_cat <- "points"
+      mpts$Group.1 <- 1
+      #bind
+      temp <- rbind(eoopoly,aoopolys,mpts)
+      #add species name
+      temp$taxa <- thetaxa
+      resultsf <- rbind(resultsf,temp)
+      
+    }
+    return(resultsf)
+  }
+  
+  
+  #dataframe to store results
+  resultsdf<- data.frame(taxa=character(),NOP=integer(),EOOkm2=double(),
+                         AOOkm=double(),MinAOO=double(),EOOcat=character(),
+                         AOOcat=character(),cellwidth=integer(),proj_metadata=character(),
+                         stringsAsFactors=FALSE)
+  
+  
+  for (thetaxa in taxalist){
+    #project one at a time
+    if(!project2gether){
+      pptll <- mypointsll[mypointsll$taxa==thetaxa,]
+      ppts <- simProjWiz(data.frame(lat=pptll$lat,long=pptll$long))
+    } else {
+      ppts <- mypointsxy[mypointsxy$taxa==thetaxa,]
+      ppts <- ppts[1:2]
+      attr(ppts,'crs') <- attr(mypointsxy,'crs')
+    }
+    #do the work
+    eooarea <- eoo(ppts)
+    eooRatingtxt <- eooRating(eooarea)
+    aooarea <- aoo(ppts,cellsize)
+    aooRatingtxt <- aooRating(aooarea)
+    if(aooMin){
+      minaooarea <- aooFixedRotation(ppts,cellsize,it)
+      aooRatingtxt <- aooRating(minaooarea)
+    } else {
+      minaooarea <- NA
+    }
+    resultsdf[nrow(resultsdf)+1,] <- c(thetaxa, nrow(ppts), eooarea,
+                                       aooarea, minaooarea, eooRatingtxt,
+                                       aooRatingtxt, cellsize, attr(ppts,'crs'))
+  }
+  return(resultsdf)
+}
+##############
+
+
+
+#old one left for compatablity with 1.6
+#update for new function names
 
 #' 
 #test values
@@ -101,12 +202,12 @@ ConBatch <- function(taxa,lat,long,cellsize,project2gether){
     #number of points
     nop <- nrow(taxapointsxy)
     #Minimium enclosing rectangle
-    MERps <- MER(taxapointsxy)/1000
+    MERps <- mer(taxapointsxy)/1000
     MERarea <- (MERps[2] - MERps[1]) * (MERps[4]- MERps[3])
     #EOO
     EOOa <- EOOarea(taxapointsxy)/-1000000
     #AOO with cellsize
-    AOOa <- AOOsimp(taxapointsxy,cellsize) * (cellsize/1000)^2
+    AOOa <- aoo(taxapointsxy,cellsize) * (cellsize/1000)^2
     #EOO IUCN category
     EOOcat <- EOORating(EOOa)
     #AOO IUCn category

@@ -4,21 +4,23 @@
 \alias{simProjWiz}
 \title{Simple Projection Wizard}
 \usage{
-simProjWiz(thepoints, thecentre)
+simProjWiz(thepoints, thecentre, returnV = "S")
 }
 \arguments{
-\item{thepoints}{set of points in latitude and longtitude ie c(lat,long)}
+\item{thepoints}{set of points as a dataframe with latitude and longitude}
 
-\item{thecentre}{one point ie c(lat,long)}
+\item{thecentre}{one point i.e. c(lat,long), if not specified this will be calculated from the center of gravity of all points}
+
+\item{returnV}{switches to return either  dataframe (x,y) or simple feature of points
+S = simple, returns as dataframe of x,y
+SF = simple feature of points}
 }
 \value{
-set of points in metres (x,y)
+Defaults is Set of points in meters as a dataframe with projection details attributed (stored as crs to retrieve attr(myprojectedpoints,'crs'))
 }
 \description{
-Projects any set of lat long points to a "suitable" area projection, based on it's "true centre of gravity"
-}
-\details{
-Simple equal area projection wizard
+Projects any set of lat long points to a "suitable" area projection, based on it's "true center of gravity" or user defined lat long.
+Data is expect as lat long in decimal degrees and returned in metres.
 }
 \note{
 Based around a simple continental projection, using two sets of projections
@@ -26,7 +28,7 @@ equal area cylindrical = Cylindrical equal-area = 8287
 equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area
  
 note these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal analysis
-See below for a more cartographically pleasing projection engine
+See Šavric et al for a more cartographically pleasing projection engine
 
 Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938
 }
@@ -34,11 +36,20 @@ See below for a more cartographically pleasing projection engine
 lat <- runif (200,-24,-12)
 long <- runif (200,43,51)
 ll <- data.frame(lat,long)
-cp <- trueCOGll(ll)
-pointsprojected <- simProjWiz(ll,cp)
+#let it choose the centre point from your set of points
+pointsprojected <- simProjWiz(ll)
+#using your own set of points
+pointsprojected <- simProjWiz(ll,c(-18,47))
+#check projection returned
+attr(pointsprojected,'crs')
+#return a simple features
+sf_points <- simProjWiz(ll,,"SF")
+ppoints <- simProjWiz(ll,,"SF")
+
 }
 \references{
 Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938
+https://projectionwizard.org
 
 Snyder, J.P., 1987. Map projections: A working manual, Professional Paper. Washington, D.C.
 }

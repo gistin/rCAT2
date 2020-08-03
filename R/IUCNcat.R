@@ -1,20 +1,20 @@
 ###########################################################
 #calculates the IUCN rating based on AOO and EOO area
 ###########################################################
-#' Calculates IUCN rating from EOO
-#' @title IUCN rating based from EOO Area
+#' Calculates IUCN rating on EOO
+#' @title IUCN rating based on EOO Area
 #' @description 
-#' Calculates IUCN rating based on Extent of Occurance (EOO) Area in km2
+#' Calculates IUCN rating based on Extent of Occurrence (EOO) Area in km2
 #' @author Justin Moat. J.Moat@kew.org
 #' @param EOOArea Area in km2
-#' @param abb TRUE or FALSE , TRUE = 2 letter code, FALSE = full text (see value), default = TRUE
+#' @param abb abbreviation TRUE or FALSE , TRUE = 2 letter code, FALSE = full text (see value), default = TRUE
 #' @return Text
 #' one of CR, EN, VU, NT, LC or Critically Endangered, Endangered, Vulnerable, Near Threatened, Least Concern
-#' @note Any negative values are assumpted to be positive. Near Threatened is set at 30,000 km2, follow example in IUCN petition 2014
+#' @note Any negative values are assumed to be positive. Near Threatened is set at 30,000 km2, follow example in IUCN petition 2014
 #' @examples
-#' EOOArea <- 25 
-#' EOORtext <- EOORating(EOOArea,TRUE)
-#' @seealso \code{\link{EOOarea}} for EOO calculations
+#' eooRating(250,TRUE)
+#' eooRating(250,FALSE)
+#' @seealso \code{\link{eoo}} for EOO calculations
 #' @export
 #' @references
 #' Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., 2011. Supporting Red List threat assessments with GeoCAT: geospatial conservation assessment tool. Zookeys 126, 117–26. doi:10.3897/zookeys.150.2109 
@@ -29,10 +29,7 @@
 #' 
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 
-EOORating <- function(EOOArea,abb){
-  if(missing(abb)){
-    abb = TRUE
-  }
+eooRating <- function(EOOArea,abb=TRUE){
 #  EOOArea <- 250
 #  abb <- FALSE
   #make positive
@@ -65,19 +62,24 @@ EOORating <- function(EOOArea,abb){
   return (cat)
 }
 
-#' @title IUCN rating based from AOO Area
+#kept for consistency with old version 0.1.6
+EOORating <- eooRating
+
+#' @title IUCN rating based on AOO Area
 #' @description 
 #' Calculates IUCN rating based on Area of occupancy (AOO) Area in km2
 #' @author Justin Moat. J.Moat@kew.org
 #' @param AOOArea Area in km2
-#' @param abb TRUE or FALSE , TRUE = 2 letter code, FALSE = full text (see value), default = TRUE
+#' @param abb abbreviation TRUE or FALSE , TRUE = 2 letter code, FALSE = full text (see value), default = TRUE
 #' @return Text one of CR, EN, VU, NT, LC or Critically Endangered, Endangered, Vulnerable, Near Threatened, Least Concern
 #' @note Any negative values are assumpted to be positive. 
 #' Near Threatened is set at 3,000 km2, follow example in IUCN Guidelines version 11. 2014
 #' @examples
-#' AOOArea <- 25 
-#' AOORtext <- EOORating(AOOArea,FALSE)
-#' @seealso  \code{\link{AOOsimp}} for AOO calculations
+#' #will return "Endangered"
+#' aooRating(25,FALSE)
+#' #will return "EN"
+#' aooRating(25,TRUE)
+#' @seealso  \code{\link{aoo}} for AOO calculations
 #' @export
 #' @references
 #' Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., 2011. Supporting Red List threat assessments with GeoCAT: geospatial conservation assessment tool. Zookeys 126, 117–26. doi:10.3897/zookeys.150.2109 
@@ -92,10 +94,14 @@ EOORating <- function(EOOArea,abb){
 #' 
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 
-AOORating <- function(AOOArea,abb){
+aooRating <- function(AOOArea,abb=TRUE){
   if(missing(abb)){
     abb = TRUE
   }
   cat <- NA
-  cat <- EOORating(AOOArea*10,abb)
+  cat <- eooRating(AOOArea*10,abb)
+  return(cat)
 }
+
+#kept for consistency with old version 0.1.6
+AOORating <- aooRating
