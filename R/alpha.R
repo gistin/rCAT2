@@ -1,3 +1,5 @@
+#TD large number of multiple  return odd results
+#TD mean calculation uses repeated internal triangle lengths, does this matter???? ie external lengths only occur once internal twice
 ###########################################################
 #calculates the alpha hull from a set of points
 ###########################################################

@@ -1,4 +1,6 @@
 #utilities and extra scripts
+#Thing about changing all the point tools to ptsSquare etc that way they are listed together
+
 
 ###########################################################
 #calculates the longest axis from a set of points
@@ -82,13 +84,13 @@ MER <- mer
 #' Builds a random set of points for a square area
 #' @author Justin Moat. J.Moat@kew.org
 #' @param nop number of points
-#' @param gsize size of square (width or height)
+#' @param gsize size of square (width or height), (default = 2000)
 #' @return dataframe of points (x,y)
 #' @examples
 #' dfofpoints <- squareOfPs(100,1)
 #' @export
 
-squareOfPs <- function(noP,gsize) {
+squareOfPs <- function(noP,gsize=2000) {
   X <- runif (noP,0,gsize)
   Y <- runif (noP,0,gsize)
   df <- data.frame(X,Y)
@@ -103,15 +105,15 @@ squareOfPs <- function(noP,gsize) {
 #' Builds a random set of points for a circular or oval area
 #' @author Justin Moat. J.Moat@kew.org
 #' @param nop number of points
-#' @param gsize size of square (width of longest size)
-#' @param rot angle of rotation in radians
+#' @param gsize size of square (width of longest size) (default 2000)
+#' @param rot angle of rotation in radians (default 0.785398)
 #' @param aspectRatio i.e. (major axis)/(minor axis), greater than 1, but if <1 it will just switch the axis. For a circle = 1
 #' @return dataframe of points (x,y)
 #' @examples
 #' plot(ovalOfPs(100,1,1,0.5),asp=1)
 #' @export
 
-ovalOfPs <- function(noP,gsize,rot,aspectRatio=1) {
+ovalOfPs <- function(noP,gsize=2000,rot=0.785398,aspectRatio=1) {
   xRatio <- sqrt((gsize ^ 2)/aspectRatio)
   yRatio <- xRatio * aspectRatio
   phi <- runif(noP,0,2*pi)
@@ -133,7 +135,7 @@ ovalOfPs <- function(noP,gsize,rot,aspectRatio=1) {
 #' Builds random a set of random points for an annulus (doughnut) 
 #' @author Justin Moat. J.Moat@kew.org
 #' @param nop number of points
-#' @param gsize scale of area (width of longest size)
+#' @param gsize scale of area (~ width of longest axis)
 #' @param holes hole size 0 = none, 1 = ring of points (default=0.4)
 #' @param aspectRatio i.e. (major axis)/(minor axis), greater than 1, but if <1 it will just switch the axis. For a circle = 1 (default=1)
 #' @param rot angle of rotation in radians (default = 0)
@@ -157,7 +159,7 @@ doughnutOfPs <- function(noP=100,gsize=1,holes=0.4,aspectRatio=1,rot=0){
 }
 
 ###########################################################
-#returns a set of random points for normally distrubted points
+#returns a set of random points for normally distributed points
 ###########################################################
 #' @title Set of normally distributed points
 #' @description 

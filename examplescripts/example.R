@@ -160,6 +160,54 @@ st_crs(psbuff) <- st_crs(attr(ppts,'crs'))
 
 ggplot (data=eoopolys$max) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
 
+#################################
+#looking at subpops / locations
+#################################
+#get the number of sub-pop/locations using buffer method
+subLocBuf(ppts)
+#and area
+subLocBuf(ppts,returnV="AREA")
+#get the sf object and plot
+subpop <- subLocBuf(ppts,returnV="SF")
+ggplot(data=subpop) + geom_sf() + geom_point(data=ppts,aes(X,Y))
+#user defined buffer distance in this case 2 km
+subLocBuf(ppts,bufferradius=2000,returnV="S")
+
+#with cell adjacency
+subLocGrid(ppts)
+#get area
+subLocGrid(ppts,returnV="AREA")
+#get the sf object and plot
+subpop <- subLocGrid(ppts,returnV="SF")
+ggplot(data=subpop) + geom_sf() + geom_point(data=ppts,aes(X,Y))
+#Using rook neighborhood
+subLocGrid(ppts,neighborhood = "rook")
+#with user defined cellwidth
+subLocGrid(ppts,neighborhood = "rook",cellwidth = 2000)
+
+#with Alpha hulls
+subLocAlpha(ppts)
+#get area
+subLocAlpha(ppts,returnV = "AREA")
+#user defined distance
+subLocAlpha(ppts,barrierDis=2000)
+#plotting the results
+subpop <- subLocAlpha(ppts,returnV = "SF")
+ggplot(data=subpop) + geom_sf() + geom_point(data=ppts,aes(X,Y))
+
+#using Rapoports mean propinquity
+#number of sub-populations/locations using default distances
+subLocRapoport(ppts)
+#defining your own distances
+subLocRapoport(ppts,barrierDis = 2000,bufferDis = 1000)
+#area of sub populations/locations using default distances
+subLocRapoport(ppts,returnV = "AREA")
+#results as simple features for plotting
+sfs <- subLocRapoport(ppts,returnV = "SF")
+ggplot (data=sfs$tree) + geom_sf(aes(color=barrier)) + geom_sf(data=sfs$buffers,colour='green', fill=NA) + geom_point(data=ppts,aes(X,Y)) 
+
+
+
 #############################
 #point building scripts
 #used for testing and simulations
@@ -181,7 +229,7 @@ plot(rpoints,asp=1)
 #############################
 #Scripts not used yet
 #############################
-#Distance of the longest Axis Willis et al 2003 suggest 1/10 as possible grid/scale size
+#Distance of the longest Axis Willis et al. 2003 suggest 1/10 as possible grid/scale size
 longestAxis(ppts)
 dp <- longestAxis(ppts,'P')
 plot(x=ppts$X,y=ppts$Y, asp=1)
@@ -189,6 +237,15 @@ points(dp,pch=16)
 
 #Minimum enclosing rectangle = simple metric for area
 mer(ppts)
+
+#EMST MStree
+euMST <- eMST(ppts)
+ggplot (data=euMST) + geom_sf(colour="blue")+ geom_point(data=thepoints,aes(X,Y)) 
+#ID Barriers using rapoport recommendations (mean x 2)
+meandis <- mean(euMST$distance)
+euMST$barrier <- euMST$distance > meandis * 2
+ggplot (data=euMST) + geom_sf(aes(colour=barrier)) + geom_point(data=thepoints,aes(X,Y))
+
 
 #############################
 #Batch processing examples
@@ -210,6 +267,6 @@ resultsf <- conBatch(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
 
 #plot all the EOO results
 ggplot(data=resultsf[resultsf$geom_cat=="eoo",]) + geom_sf(fill=NA)
-#pullone species and plot
+#pull one species and plot
 oneSp <- resultsf[resultsf$taxa=="aa",]
 ggplot(data=oneSp) + geom_sf(fill=NA)
