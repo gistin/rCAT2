@@ -7,7 +7,7 @@
 #' @description 
 #' Combines the main of routines in rCAT to process multiple species for AOO, EOO etc.
 #' @author Justin Moat. J.Moat@kew.org
-#' @note Has a switch to either project all data as a whole or each taxa separately. I would suggest you use this switch if data is all from a similar area (i.e. all from one continent/country/region)
+#' @note Has a switch to either project all data as a whole or each taxa separately. We would suggest you use this switch if data is all from a similar area (i.e. all from one continent/country/region)
 #' @details This function expects a list of taxa and latitudes and longitudes.ie\cr
 #' \tabular{lll}{
 #' species_w \tab 85.388000  \tab   84.33100\cr 
@@ -22,13 +22,13 @@
 #' etc
 #' @param taxa field which defines a list of species or taxa
 #' @param lat field which defines the latitude set of points
-#' @param long field which defines the longtitude set of points
+#' @param long field which defines the longitude set of points
 #' @param project2gether TRUE or FALSE, TRUE all data is projected together using the centre of all latitudes and longitudes. FALSE each species is projected separately. Default = TRUE
 #' @param cellsize cell length in metres used to for AOO projection N.B. IUCN recommend 2000 m (default 2000)
-#' @param aooMin calls the aooMin routines as well as simple aoo, bewarned with lots of species this can take some time to run (default=FALSE)
-#' @param it if aooMin=TRUE this determins the number of iterations it will run to find aooMin
-#' @param returnV switches to return different sets of results: 
-#' S = simple returns a dataframe of results = (taxa ,Number of points,EOO in km2, Simple AOO in km2,Minimum AOO, EOO category, AOOcategory, Cellwidth, projection parameters)
+#' @param aooMin calls the aooMin routines as well as simple aoo, be warned with lots of species and points this can take some time to run (default=FALSE)
+#' @param it if aooMin=TRUE this determines the number of iterations it will run to find aooMin (default=1296)
+#' @param returnV switches to return different sets of results: \cr
+#' S = simple returns a dataframe of results = (taxa ,Number of points,EOO in km2, Simple AOO in km2,Minimum AOO, EOO category, AOOcategory, Cellwidth, projection parameters) \cr
 #' SF = simple features dataframe will all results, taxa in taxa field, geometryclass=(EOO,AOO,points). NB all points will be projected together and aooMin is ignored
 #' 
 #' 
@@ -131,18 +131,18 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
     }
     #do the work
     eooarea <- eoo(ppts)
-    eooRatingtxt <- eooRating(eooarea)
+    ratingEootxt <- ratingEoo(eooarea)
     aooarea <- aoo(ppts,cellsize)
-    aooRatingtxt <- aooRating(aooarea)
+    ratingAootxt <- ratingAoo(aooarea)
     if(aooMin){
       minaooarea <- aooFixedRotation(ppts,cellsize,it)
-      aooRatingtxt <- aooRating(minaooarea)
+      ratingAootxt <- ratingAoo(minaooarea)
     } else {
       minaooarea <- NA
     }
     resultsdf[nrow(resultsdf)+1,] <- c(thetaxa, nrow(ppts), eooarea,
-                                       aooarea, minaooarea, eooRatingtxt,
-                                       aooRatingtxt, cellsize, attr(ppts,'crs'))
+                                       aooarea, minaooarea, ratingEootxt,
+                                       ratingAootxt, cellsize, attr(ppts,'crs'))
   }
   return(resultsdf)
 }
@@ -209,9 +209,9 @@ ConBatch <- function(taxa,lat,long,cellsize,project2gether){
     #AOO with cellsize
     AOOa <- aoo(taxapointsxy,cellsize) * (cellsize/1000)^2
     #EOO IUCN category
-    EOOcat <- EOORating(EOOa)
+    EOOcat <- ratingEoo(EOOa)
     #AOO IUCn category
-    AOOcat <- AOORating(AOOa)
+    AOOcat <- ratingAoo(AOOa)
     #population the results data frame
     resultsdf[nrow(resultsdf)+1,] <- c(taxa,nop,MERarea,EOOa,AOOa,EOOcat,AOOcat)
     } #end of loop

@@ -3,24 +3,24 @@
 ###########################################################
 #' @title Simple Projection Wizard
 #' @description 
-#' Projects any set of lat long points to a "suitable" area projection, based on it's "true center of gravity" or user defined lat long.
-#' Data is expect as lat long in decimal degrees and returned in metres.
+#' Projects any set of latitude and longitude points to a "suitable" area projection, based on thieir "true centre of gravity".
+#' Data is expected as lat long in decimal degrees and returned in metres.
+#' Input data is checked to make sure it’s sensible before projection (i.e. lat and longs on the earth no null or NA values)
 #' @author Justin Moat. J.Moat@kew.org
 #' @note
-#' Based around a simple continental projection, using two sets of projections
-#' equal area cylindrical = Cylindrical equal-area = 8287
-#' equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area
+#' Based around a simple continental projection, using two sets of projections \cr
+#' equal area cylindrical = Cylindrical equal-area \cr
+#' equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area \cr
 #'  
-#' note these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal analysis
-#' See Šavric et al for a more cartographically pleasing projection engine
-#' 
-#' Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938
+#' NB these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal and distance analysis.
+#' See Šavric et al for a more cartographically pleasing projection engine \cr
+#' Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938 and https://projectionwizard.org/
 #' @param thepoints set of points as a dataframe with latitude and longitude 
 #' @param thecentre one point i.e. c(lat,long), if not specified this will be calculated from the center of gravity of all points
-#' @param returnV switches to return either  dataframe (x,y) or simple feature of points  
-#' S = simple, returns as dataframe of x,y
+#' @param returnV switches to return either  dataframe (x,y) or simple feature of points  \cr
+#' S = simple, returns as dataframe of x,y \cr
 #' SF = simple feature of points
-#' @return Defaults is Set of points in meters as a dataframe with projection details attributed (stored as crs to retrieve attr(myprojectedpoints,'crs'))
+#' @return Defaults is a set of points in meters as a dataframe with projection details attributed (stored as crs to retrieve attr(myprojectedpoints,'crs'))
 #' @examples 
 #'lat <- runif (200,-24,-12)
 #'long <- runif (200,43,51)
@@ -80,7 +80,7 @@ simProjWiz <- function(thepoints,thecentre,returnV="S"){
 ######################################################################
 #' @title True centre of gravity from a set of Lat longs
 #' @description 
-#' Calculates the "true" centre of gravity (weighted) from a set of lat longs, using cartesian geometry
+#' Calculates the "true" centre of gravity (weighted) from a set of lat longs, using cartesian geometry. Used as part of the projection wizard.
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints set of points c(lat,long)
 #' @return a point (lat,long) from centre
@@ -109,7 +109,7 @@ trueCOGll <-function(thepoints){
 ######################################################################
 #' @title Geographic coordinates to cartesian (x,y,z)
 #' @description 
-#' Calculates the Cartesian cordinates (x,y,z) from lat long in radians
+#' Calculates the Cartesian coordinates (x,y,z) from lat long in radians. Used as part of the projection wizard.
 #' @author Justin Moat. J.Moat@kew.org
 #' @param latr latitude point in radians
 #' @param longr longtitude point in radians
@@ -135,7 +135,7 @@ ll2cart <- function(latr,longr){
 ######################################################################
 #' @title Cartesian (x,y,z) to Geographic coordinates
 #' @description 
-#' calculates the latitude and longtitude cordinates in radians from Cartesian coordinates (x,y,z)
+#' calculates the latitude and longitude cordinates in radians from Cartesian coordinates (x,y,z). Used as part of the projection wizard.
 #' @author Justin Moat. J.Moat@kew.org
 #' @param x East to West coordinate in metres
 #' @param y South to North coordinate in metres
@@ -158,7 +158,8 @@ cart2ll <-function (x,y,z){
 ######################################################################
 #' @title Cartesian coordinate projection
 #' @description 
-#' Used as part of the projection wizard, calculates Cartesian (x,y,z), projected from the centre of the sphere to the earth surface, returns cartesian (x,y,z)
+#' Used as part of the projection wizard, calculates Cartesian (x,y,z), projected from the centre of the sphere to the earth surface, returns cartesian coordinates (x,y,z)
+#' 
 #' @author Justin Moat. J.Moat@kew.org
 #' @note
 #' http://stackoverflow.com/questions/9604132/how-to-project-a-point-on-to-a-sphere
@@ -184,7 +185,7 @@ pro2sph <- function (x,y,z){
 ######################################################################
 #' @title Radians to Degrees
 #' @description 
-#' Calculates radians from degrees or degrees from radians
+#' Calculates degrees from radians
 #' @author Justin Moat. J.Moat@kew.org
 #' @param rad number in radians
 #' @return number
@@ -201,7 +202,7 @@ rad2deg <- function(rad) {(rad * 180) / (pi)}
 #' @title 
 #' Degrees to radians
 #' @description 
-#' Calculates radians from degrees or degrees from radians
+#' Calculates radians from degrees
 #' @author Justin Moat. J.Moat@kew.org
 #' @param deg number in degrees
 #' @return number
@@ -213,15 +214,18 @@ rad2deg <- function(rad) {(rad * 180) / (pi)}
 deg2rad <- function(deg) {(deg * pi) / (180)}
 
 ######################################################################
-#Crude dataframe check for sensible latitude and longtitude data
+#Crude dataframe check for sensible latitude and longitude data
 ######################################################################
 #' @title 
-#' Check point data and lat long's are sensible
+#' Check point data and latitude and longitude are sensible to work with
 #' @description 
 #' Checked the dataframe for NA, latitude below -90 or above 90, longitude below -180 and above 180, also warns if it finds whole numbers or 0
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints set of points as a dataframe with latitude and longitude 
 #' @return nothing or warning or error
+#' @note
+#' this used as a quick check to see if data can be worked with and are on the earth. 
+#' If coordinate cleaning is required we suggest you review https://cran.r-project.org/web/packages/CoordinateCleaner/index.html
 #' @examples 
 #' # build dataframe
 #' lat <- runif (200,-24,-12)

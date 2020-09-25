@@ -1,7 +1,4 @@
 #utilities and extra scripts
-#Thing about changing all the point tools to ptsSquare etc that way they are listed together
-
-
 ###########################################################
 #calculates the longest axis from a set of points
 ###########################################################
@@ -9,7 +6,7 @@
 #' @description 
 #' Calculates the longest distances from a set of points
 #' @author Justin Moat. J.Moat@kew.org
-#' @note Useful for scale for cellsize, Willis et al 2003 suggest 1/10 of this for cellsize for AOO calculations
+#' @note Useful as a scale for cellsize and location buffers, Willis et al 2003 suggest 1/10 of this for cellsize for AOO calculations as does Rivers et al (2010) for buffer distance for sub-population or location calculations. 
 #' @param thepoints dataframe of points of x,y
 #' @param returnV, two switches either S for simply the distance or P for a dataframe of the two furthest points 
 #' @return distance in metres or two points for the longest distance
@@ -79,7 +76,7 @@ MER <- mer
 ###########################################################
 #returns a set of random points for a square area         #
 ###########################################################
-#' @title Set of points in a square area
+#' @title Builds a set of points in a square area
 #' @description 
 #' Builds a random set of points for a square area
 #' @author Justin Moat. J.Moat@kew.org
@@ -87,10 +84,10 @@ MER <- mer
 #' @param gsize size of square (width or height), (default = 2000)
 #' @return dataframe of points (x,y)
 #' @examples
-#' dfofpoints <- squareOfPs(100,1)
+#' dfofpoints <- ptsSquare(100,1)
 #' @export
 
-squareOfPs <- function(noP,gsize=2000) {
+ptsSquare <- function(noP,gsize=2000) {
   X <- runif (noP,0,gsize)
   Y <- runif (noP,0,gsize)
   df <- data.frame(X,Y)
@@ -100,20 +97,20 @@ squareOfPs <- function(noP,gsize=2000) {
 ###########################################################
 #returns a set of random points for a oval/circle area    #
 ###########################################################
-#' @title Set of a circle or oval points
+#' @title Builds a set of a circle or oval points
 #' @description 
 #' Builds a random set of points for a circular or oval area
 #' @author Justin Moat. J.Moat@kew.org
 #' @param nop number of points
 #' @param gsize size of square (width of longest size) (default 2000)
 #' @param rot angle of rotation in radians (default 0.785398)
-#' @param aspectRatio i.e. (major axis)/(minor axis), greater than 1, but if <1 it will just switch the axis. For a circle = 1
+#' @param aspectRatio i.e. (major axis)/(minor axis), can be greater than 1, but if so it will just switch the axis. (default =1 ie circle).
 #' @return dataframe of points (x,y)
 #' @examples
-#' plot(ovalOfPs(100,1,1,0.5),asp=1)
+#' plot(ptsOval(100,1,1,0.5),asp=1)
 #' @export
 
-ovalOfPs <- function(noP,gsize=2000,rot=0.785398,aspectRatio=1) {
+ptsOval <- function(noP,gsize=2000,rot=0.785398,aspectRatio=1) {
   xRatio <- sqrt((gsize ^ 2)/aspectRatio)
   yRatio <- xRatio * aspectRatio
   phi <- runif(noP,0,2*pi)
@@ -130,23 +127,23 @@ ovalOfPs <- function(noP,gsize=2000,rot=0.785398,aspectRatio=1) {
 ###########################################################
 #returns a set of random points for an annulus (doughnut)    #
 ###########################################################
-#' @title Set of annulus (doughnut) points
+#' @title Builds a set of annulus (doughnut) points
 #' @description 
-#' Builds random a set of random points for an annulus (doughnut) 
+#' Builds random a set of random points for an annulus (doughnut shape) 
 #' @author Justin Moat. J.Moat@kew.org
 #' @param nop number of points
 #' @param gsize scale of area (~ width of longest axis)
-#' @param holes hole size 0 = none, 1 = ring of points (default=0.4)
-#' @param aspectRatio i.e. (major axis)/(minor axis), greater than 1, but if <1 it will just switch the axis. For a circle = 1 (default=1)
-#' @param rot angle of rotation in radians (default = 0)
+#' @param holes hole size, between 0 and 1, 0 = no hole, 1 = cirlce of points (default=0.4)
+#' @param aspectRatio For an ellipse shape i.e. (major axis)/(minor axis), greater than 1, but if <1 it will just switch the axis. For a circle = 1 (default=1)
+#' @param rot angle of rotation for the ellipse in radians (default = 0)
 #' @return dataframe of points (x,y)
 #' @examples
-#' doughnutofpoints <- doughnutOfPs (100,1,0.4,0.5,0.5)
+#' doughnutofpoints <- ptsDoughnut (100,1,0.4,0.5,0.5)
 #' plot(doughnutofpoints)
 #' @export
 
 
-doughnutOfPs <- function(noP=100,gsize=1,holes=0.4,aspectRatio=1,rot=0){
+ptsDoughnut <- function(noP=100,gsize=1,holes=0.4,aspectRatio=1,rot=0){
   gsize <- 0
   theta<-runif(noP,0,2*pi)
   r<-sqrt(runif(noP,(holes*0.5)^2,0.5^2))
@@ -159,9 +156,9 @@ doughnutOfPs <- function(noP=100,gsize=1,holes=0.4,aspectRatio=1,rot=0){
 }
 
 ###########################################################
-#returns a set of random points for normally distributed points
+#returns a set of random normally distributed points
 ###########################################################
-#' @title Set of normally distributed points
+#' @title Builds a set of normally distributed points
 #' @description 
 #' Builds random a set of normally distribute 
 #' @author Justin Moat. J.Moat@kew.org
@@ -169,11 +166,10 @@ doughnutOfPs <- function(noP=100,gsize=1,holes=0.4,aspectRatio=1,rot=0){
 #' @param gsize scale of area (width of longest size), NB this is within 3 SD so some point may extend beyond this
 #' @return dataframe of points (x,y)
 #' @examples
-#' normalpoints <- normalofPs(100,1)
+#' normalpoints <- ptsNormal(100,1)
 #' plot(normalpoints)
 #' @export
-
-normalofPs <- function(nop=100,gsize=1){
+ptsNormal <- function(nop=100,gsize=1){
   X<- rnorm(nop)*(gsize/3)
   Y<- rnorm(nop)*(gsize/3)
   df <- data.frame(X,Y)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/aoo.R
 \name{buildCellPolys_rxy}
 \alias{buildCellPolys_rxy}
-\title{Build cell polygons from points, rotation and shift in x and y}
+\title{Build simple feature polygons from point data, rotation and shift in x and y direction}
 \usage{
 buildCellPolys_rxy(thepoints, cellsize, rot, shiftx, shifty)
 }
@@ -21,11 +21,12 @@ buildCellPolys_rxy(thepoints, cellsize, rot, shiftx, shifty)
 Simple Feature of polygons
 }
 \description{
-Builds square cell polygons from points and rotation, shift in X and y returns polygons for ggplot2 and mapping.
+Builds cell polygons (as simple features) from points and rotation, shift in X and y returns polygons for ggplot2 and mapping.
+Generally used to plot data from AOO calculations.
 }
 \examples{
 #Build and project some points
-thepoints <- squareOfPs(19,0.1)
+thepoints <- ptsSquare(19,0.1)
 names(thepoints) <- c("lat","long")
 thepoints <- simProjWiz(thepoints)
 #Check projection information is attributed

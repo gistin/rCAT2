@@ -92,18 +92,18 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
        }
     #do the work
       eooarea <- eoo(ppts)
-      eooRatingtxt <- eooRating(eooarea)
+      ratingEootxt <- ratingEoo(eooarea)
       aooarea <- aoo(ppts,cellsize)
-      aooRatingtxt <- aooRating(aooarea)
+      ratingAootxt <- ratingAoo(aooarea)
     if(aooMin){
       minaooarea <- aooFixedRotation(ppts,cellsize,it)
-      aooRatingtxt <- aooRating(minaooarea)
+      ratingAootxt <- ratingAoo(minaooarea)
     } else {
       minaooarea <- NA
       }
     resultsdf[nrow(resultsdf)+1,] <- c(thetaxa, nrow(ppts), eooarea,
-                                       aooarea, minaooarea, eooRatingtxt,
-                                       aooRatingtxt, cellsize, attr(ppts,'crs'))
+                                       aooarea, minaooarea, ratingEootxt,
+                                       ratingAootxt, cellsize, attr(ppts,'crs'))
   }
   return(resultsdf)
 }

@@ -1,31 +1,34 @@
+#TODO
+#sort out EOO min
+
 ##########################################################
 #calculates a possible solution for min and max EOO from a set of points and error
 ##########################################################
-#' @title Minimum (near) Extent of Occurrence (EOO) from points with errors
+#' @title BETA Minimum (near) Extent of Occurrence (EOO) from points with errors radius
 #' @description 
 #' Calculates the Extent of Occurrence in meters or returns a spatial polygon from a set of points (x,y)
-#' Note this algorithm will not always return the smallest area, this is true of very long and skinny sets of points. 
-#' But will give a very quick approximation which in most situations  will work.
+#' Note this algorithm is in beta and will not always return the smallest area, this is true of very long and skinny sets of points. 
+#' But will give a very quick approximation which in most situations  will suffice.
 #' EOO's are constructed from the centroid and rays to each of the points on the convex hull and where these rays intercept the error circle
 #' @note
-#' BETA: it will go wrong with errors which overlap (ie small EOO)
-#' Not quite min or max in most cases, but close
-#' 
+#' BETA: it will go wrong with errors which overlap (i.e. small EOO)
+#' Not quite min or max in most cases, but should be close.
+#' Probably worth looking at when EOO is near thresholds.
 #' @author Justin Moat. J.Moat@kew.org
 #' @author Amelie Moat
 #' @param thepoints dataframe of points in metres i.e. c(x,y,error or x,y)
 #' @param errorfield field with the error radius if null, default error will be used
 #' @param defaultRadius if no error field a default error will be applied to all points (default = 2000)
-#' @param returnV switch to return different sets of results: 
-#' S = Simple, returns just the minimum area in km2, (DEFAULT)
-#' EX = returns list for two areas -  near minimum and near maximum area for reference
-#' SF = returns the minimum polygon as a simple feature for mapping, plotting in ggplot or export to GIS systems
-#' SFA = returns a list with both the near minimum polygon and near maximum as a simple feature for mapping, plotting in ggplot or export to GIS systems
+#' @param returnV switch to return different sets of results: \cr
+#' S = Simple, returns just the minimum area in km2, (DEFAULT) \cr
+#' EX = returns list for two areas -  near minimum and near maximum area for reference \cr
+#' SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format \cr 
+#' SFA = returns a list of simple features with both the near minimum polygon and near maximum as a simple feature for mapping, plotting in ggplot or export to GIS systems
 #' 
 #' @return float_value area in km2 EOO polygon or sf polygon
 #' @examples
 #'#construct an oval of point for testing
-#'thepoints <- ovalOfPs(19,0.5,deg2rad(45),0.5)
+#'thepoints <- ptsOval(19,0.5,deg2rad(45),0.5)
 #'names(thepoints) <- c("lat","long")
 #'#project the points
 #'thepoints <- simProjWiz(thepoints)
@@ -61,14 +64,14 @@
 #'###################
 #'#with a content error radius
 #'#construct an oval of point for testing
-#'thepoints <- ovalOfPs(19,0.5,deg2rad(45),0.5)
+#'thepoints <- ptsOval(19,0.5,deg2rad(45),0.5)
 #'names(thepoints) <- c("lat","long")
 #'#project the points
 #'thepoints <- simProjWiz(thepoints)
 #'#
 #'eooMin(thepoints,,2000,'S')
 #'plot(eooMin(thepoints,,2000,'SF'))
-#' @seealso \code{\link{eooRating}} for EOO Ratings
+#' @seealso \code{\link{ratingEoo}} for EOO Ratings
 #' @export
 #' @importFrom grDevices chull
 #' @importFrom pracma polyarea
@@ -168,12 +171,12 @@ polyCon <- function(pointsmatrix,crs){
 ###########################################################
 #' @title Extent of Occurrence (EOO) Area
 #' @description 
-#' Calculates the Extent of Occurrence in km2 or returns a spatial polygon from a set of points (x,y)
+#' Calculates the Extent of Occurrence in km2 or returns a simple feature polygon from a set of points (x,y)
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints dataframe of points in metres i.e. c(x,y)
-#' @param returnV switch to return different sets of results: 
-#' S = Simple, returns just the minimum area in km2, (DEFAULT)
-#' SF = returns a polygon simple feature for mapping, plotting in ggplot or export to GIS systems
+#' @param returnV switch to return different sets of results: \cr
+#' S = Simple, returns just the minimum area in km2, (DEFAULT) \cr
+#' SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format
 #' 
 #' @return float_value area of EOO polygon or sf polygon
 #' @note area returned is in x,y units, but negative as polygon is constructed anticlockwise
@@ -185,7 +188,7 @@ polyCon <- function(pointsmatrix,crs){
 #' #######
 #' spoly <- eoo (df,TRUE)
 #' plot(spoly)
-#' @seealso \code{\link{eooRating}} for EOO Ratings
+#' @seealso \code{\link{ratingEoo}} for EOO Ratings
 #' @export
 #' @importFrom grDevices chull
 #' @importFrom pracma polyarea

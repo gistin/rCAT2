@@ -13,7 +13,7 @@ rad2deg(rad)
 number
 }
 \description{
-Calculates radians from degrees or degrees from radians
+Calculates degrees from radians
 }
 \examples{
 b <- 0.392699

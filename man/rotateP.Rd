@@ -19,7 +19,7 @@ Rotates a set of point by an angle in radians. Used as part of the AOO rotation 
 }
 \examples{
 #Build and project some points
-thepoints <- squareOfPs(200,0.1)
+thepoints <- ptsSquare(200,0.1)
 #rotate by 45 degrees
 rpoints <- rotateP(thepoints,deg2rad(45))
 plot(rpoints,asp=1)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/aoo.R
 \name{aooFixedRotation}
 \alias{aooFixedRotation}
-\title{Systematic shifting and rotating grid for Area of Occupancy (AOO)}
+\title{Area of Occupancy (AOO) calculated by Systematic shifting and rotating of the grid}
 \usage{
 aooFixedRotation(
   thepoints,
@@ -42,7 +42,7 @@ Moat, J., Bachman, S. P., Field, R., & Boyd, D. S. (2018). Refining area of occu
 }
 \examples{
 #Build and project some points
-thepoints <- squareOfPs(19,0.1)
+thepoints <- ptsSquare(19,0.1)
 names(thepoints) <- c("lat","long")
 thepoints <- simProjWiz(thepoints)
 attr(thepoints,'crs')
@@ -72,7 +72,7 @@ Moat, J., Bachman, S. P., Field, R., & Boyd, D. S. (2018). Refining area of occu
 Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., 2011. Supporting Red List threat assessments with GeoCAT: geospatial conservation assessment tool. Zookeys 126, 117–26. doi:10.3897/zookeys.150.2109
 }
 \seealso{
-\code{\link{aooRating}} for AOO Ratings
+\code{\link{ratingAoo}} for AOO Ratings
 
 \code{\link{aooFixedGrid}} for fixed grid optimal method
 

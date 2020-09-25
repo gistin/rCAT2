@@ -17,7 +17,7 @@ pro2sph(x, y, z)
 x,y,z
 }
 \description{
-Used as part of the projection wizard, calculates Cartesian (x,y,z), projected from the centre of the sphere to the earth surface, returns cartesian (x,y,z)
+Used as part of the projection wizard, calculates Cartesian (x,y,z), projected from the centre of the sphere to the earth surface, returns cartesian coordinates (x,y,z)
 }
 \note{
 http://stackoverflow.com/questions/9604132/how-to-project-a-point-on-to-a-sphere

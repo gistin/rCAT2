@@ -2,7 +2,7 @@
 % Please edit documentation in R/Sub_loc_frag.R
 \name{subLocGrid}
 \alias{subLocGrid}
-\title{Sub-population or number of locations using grid adjacency}
+\title{Sub-population or number of locations using grid adjacency method}
 \usage{
 subLocGrid(
   thepoints,
@@ -18,21 +18,21 @@ subLocGrid(
 
 \item{neighborhood}{either rook (up,down,left and right) or queen (rook plus diagonals) default = queen}
 
-\item{returnV}{three switches for return values 
-S = simply the number of sub-pop or locations 
-AREA = returns the area of the cells (use aoo for useful areas)
-SF = return the simple feature for plotting and mapping
+\item{returnV}{three switches for return values \cr
+S = simply the number of sub-pop or locations \cr
+AREA = returns the area of the cells (use AOO for useful areas methods for IUCN assessments) \cr
+SF = return the simple feature for plotting, mapping and export to a GIS
 #' @return number of sub-pop/locations}
 }
 \description{
-Calculates the number of Sub-population or number of locations from grid adjacency
+Calculates the number of Sub-population or number of locations using the grid adjacency method
 }
 \note{
 Malin et al 2010 suggest cells width of 1/10 the longest distance. This uses the default grid (0,0)
 }
 \examples{
 #Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
-thepoints <- normalofPs(50,0.1)
+thepoints <- ptsNormal(50,0.1)
 #shift to Troodos mountaions
 thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
 #project the points

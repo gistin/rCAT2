@@ -17,7 +17,7 @@ cart2ll(x, y, z)
 dataframe of latitude,longtitude
 }
 \description{
-calculates the latitude and longtitude cordinates in radians from Cartesian coordinates (x,y,z)
+calculates the latitude and longitude cordinates in radians from Cartesian coordinates (x,y,z). Used as part of the projection wizard.
 }
 \author{
 Justin Moat. J.Moat@kew.org

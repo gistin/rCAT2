@@ -9,15 +9,15 @@ eoo(thepoints, returnV = "S")
 \arguments{
 \item{thepoints}{dataframe of points in metres i.e. c(x,y)}
 
-\item{returnV}{switch to return different sets of results: 
-S = Simple, returns just the minimum area in km2, (DEFAULT)
-SF = returns a polygon simple feature for mapping, plotting in ggplot or export to GIS systems}
+\item{returnV}{switch to return different sets of results: \cr
+S = Simple, returns just the minimum area in km2, (DEFAULT) \cr
+SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format}
 }
 \value{
 float_value area of EOO polygon or sf polygon
 }
 \description{
-Calculates the Extent of Occurrence in km2 or returns a spatial polygon from a set of points (x,y)
+Calculates the Extent of Occurrence in km2 or returns a simple feature polygon from a set of points (x,y)
 }
 \note{
 area returned is in x,y units, but negative as polygon is constructed anticlockwise
@@ -37,7 +37,7 @@ Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., 2011. Supporting Red
 Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 }
 \seealso{
-\code{\link{eooRating}} for EOO Ratings
+\code{\link{ratingEoo}} for EOO Ratings
 }
 \author{
 Justin Moat. J.Moat@kew.org

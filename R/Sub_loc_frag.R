@@ -2,22 +2,21 @@
 ##################################################################################
 #calculates the number of Sub-population or number of locations from buffer method
 ##################################################################################
-#' @title Sub-population or number of locations using buffer method
+#' @title Sub-population or number of locations using the buffer method
 #' @description 
-#' Calculates the number of Sub-population or number of locations from buffer method
+#' Calculates the number of Sub-population or number of locations using the buffer method
 #' @author Justin Moat. J.Moat@kew.org
 #' @note Malin et al 2010 suggest buffer size of 1/10 the longest distance
 #' @param thepoints dataframe of points of x,y
 #' @param bufferradius in metres, (default = 1/10 the longest axis of the set of points)
-#' @param returnV three switches for return values 
-#' S = simply the number of sub-pop or locations 
-#' AREA = returns the area of the buffered output
-#' SF = return the simple feature for plotting and mapping
-#' 
+#' @param returnV three switches for return values \cr
+#' S = simply the number of sub-pop or locations \cr
+#' AREA = returns the area of the buffered output \cr
+#' SF = return the simple feature for plotting, mapping and export to a GIS
 #' @return number of sub-pop/locations
 #' @examples 
 #'#Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
-#'thepoints <- normalofPs(50,0.1)
+#'thepoints <- ptsNormal(50,0.1)
 #'#shift to Troodos mountaions
 #'thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
 #'#project the points
@@ -56,22 +55,22 @@ subLocBuf <- function (thepoints,bufferradius=longestAxis(thepoints,returnV='S')
 ##################################################################################
 #calculates the number of Sub-population or number of locations from cell adjacency method
 ##################################################################################
-#' @title Sub-population or number of locations using grid adjacency
+#' @title Sub-population or number of locations using grid adjacency method
 #' @description 
-#' Calculates the number of Sub-population or number of locations from grid adjacency
+#' Calculates the number of Sub-population or number of locations using the grid adjacency method
 #' @author Justin Moat. J.Moat@kew.org
 #' @note Malin et al 2010 suggest cells width of 1/10 the longest distance. This uses the default grid (0,0)
 #' @param thepoints dataframe of points of x,y
 #' @param cellwidth in metres, (default = 1/10 the longest axis of the set of points)
 #' @param neighborhood either rook (up,down,left and right) or queen (rook plus diagonals) default = queen
-#' @param returnV three switches for return values 
-#' S = simply the number of sub-pop or locations 
-#' AREA = returns the area of the cells (use aoo for useful areas)
-#' SF = return the simple feature for plotting and mapping
+#' @param returnV three switches for return values \cr
+#' S = simply the number of sub-pop or locations \cr
+#' AREA = returns the area of the cells (use AOO for useful areas methods for IUCN assessments) \cr
+#' SF = return the simple feature for plotting, mapping and export to a GIS
 #' #' @return number of sub-pop/locations
 #' @examples 
 #'#Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
-#'thepoints <- normalofPs(50,0.1)
+#'thepoints <- ptsNormal(50,0.1)
 #'#shift to Troodos mountaions
 #'thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
 #'#project the points
@@ -117,22 +116,22 @@ subLocGrid <- function (thepoints,cellwidth=longestAxis(thepoints,returnV='S')/1
 ##################################################################################
 #calculates the number of Sub-population or number of locations from alpha hull method
 ##################################################################################
-#' @title Sub-populations or locations using alpha hull method
+#' @title Sub-populations or locations using the alpha hull method
 #' @description 
-#' Calculates the number of Sub-population or number of locations from alpha hull method
+#' Calculates the number of Sub-population or  locations using the alpha hull method
 #' @author Justin Moat. J.Moat@kew.org
 #' @note Malin et al 2010 suggest barrier width of 1/10 the longest distance. 
 #' @param thepoints dataframe of points of x,y
 #' @param barrierDis in metres, (default = 1/10 the longest axis of the set of points)
-#' #' @param returnV four switches either 
-#' S = for simply the number of sub-pop or locations 
-#' AREA = returns the area of the cells (use aoo for useful areas)
-#' SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to GIS systems
+#' @param returnV four switches either \cr
+#' S = for simply the number of sub-pop or locations \cr
+#' AREA = returns the area of the cells (use AOO or EOO for useful areas for IUCN assessment) \cr
+#' SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to a GIS  \cr
 #' ALL = returns a multipolygon of all the triangular elements of the alpha hull
 #' @return number of sub-pop/locations
 #' @examples 
 #'#Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
-#'thepoints <- normalofPs(50,0.1)
+#'thepoints <- ptsNormal(50,0.1)
 #'#shift to Troodos mountaions
 #'thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
 #'#project the points
@@ -155,7 +154,7 @@ subLocGrid <- function (thepoints,cellwidth=longestAxis(thepoints,returnV='S')/1
 #' @seealso \code{\link{longestAxis}} to calculate the length of the longest axis
 #' @seealso \code{\link{aHullMean}} to calculate the alpha hull using multiples of the mean lengths of the Delaunay triangulation
 #' @note 
-#' As the barrier distance increases for Alpha hulls, point become outliners with no area. This algorithm returns the number of groups and the number of these outliner for the sub population or location number
+#' As the barrier distance increases for Alpha hulls, point become outliners with no area. This algorithm returns the number of grouped points (in the hull) and the number of these outlying points for the sub population or location calculations. 
 #' We would not recommend using Alpha hulls for sub populations or locations, but it is supplied here for consistency and for those that want to experiment.
 
 subLocAlpha <- function (thepoints,barrierDis=longestAxis(thepoints,returnV='S')/10,returnV="S") {

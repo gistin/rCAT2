@@ -14,17 +14,17 @@ Simple feature of linestring, with a df of X1,Y1,X2,Y2,distance and geom. N.B. X
 }
 \description{
 Calculates the Euclidean Minimum spanning tree from a set of points. 
-This is used for the first part of Rapoport's (1982) mean propinquity method.
+This is used for the  tree and branch building part of Rapoport's (1982) mean propinquity method.
 }
 \note{
-EMST is computed from Computes Euclidean Minimum Spanning Trees (EMST) using the fast 
+EMST is computed from Euclidean Minimum Spanning Trees (EMST) using the fast 
 Dual-Tree Boruvka algorithm (March, Ram, Gray, 2010, <doi:10.1145/1835804.1835882>) implemented in 'mlpack' - the C++ Machine 
 Learning library (Curtin et al., 2013). 'emstreeR' R wrapped for these algorithms  from Allan Quadros & Andre Cancado 2019 
 https://cran.r-project.org/web/packages/emstreeR/index.html & https://github.com/allanvc/emstreeR
 }
 \examples{
 #Build and project some points
-thepoints <- squareOfPs(19,0.1)
+thepoints <- ptsSquare(19,0.1)
 names(thepoints) <- c("lat","long")
 thepoints <- simProjWiz(thepoints)
 #get the Euclidean Minimum spanning tree

@@ -13,7 +13,7 @@ trueCOGll(thepoints)
 a point (lat,long) from centre
 }
 \description{
-Calculates the "true" centre of gravity (weighted) from a set of lat longs, using cartesian geometry
+Calculates the "true" centre of gravity (weighted) from a set of lat longs, using cartesian geometry. Used as part of the projection wizard.
 }
 \examples{
 lat <- runif (200,-24,-12)

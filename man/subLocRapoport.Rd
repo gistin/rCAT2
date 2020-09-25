@@ -13,10 +13,10 @@ subLocRapoport(thepoints, barrierDis, bufferDis, returnV = "S")
 
 \item{bufferDis}{distance (in m) to be used to buffer points and connected edges (if not defined the default is the mean branch length of the Euclidean Minimum spanning tree )}
 
-\item{returnV, }{switches to return different sets of results: 
-S = Simple, returns just the number of sub-populations or locations (default)
-AREA = returns the area (km2) of the buffered points and minimum spanning tree
-SF = returns a list with two simple features (tree and buffers) for visualisation, mapping and further analysis}
+\item{returnV, }{switches to return different sets of results: \cr
+S = Simple, returns just the number of sub-populations or locations (default) \cr
+AREA = returns the area (km2) of the buffered points and tree \cr
+SF = returns a list with two simple features (tree and buffers) for visualisation, mapping, further analysis and export to a GIS}
 }
 \value{
 dependent on switch, default is area in km2
@@ -25,17 +25,17 @@ see returnV
 }
 \description{
 Calculates Rapoport's (1982) mean propinquity from a set of points. 
-Rapoport’s mean propinquity method (Willis et al. 2003, Rapoport 1982). This technique is
-based on a Euclidean minimum spanning tree (MST), which is a
-set of lines that connects all points in the minimum possible distance. Subpopulations
-are defined when the edge (line from a pair of points) distance is greater than the define distance 
+For details on Rapoport’s mean propinquity methodsee Willis et al. 2003 and Rapoport 1982. This technique is
+based on a Euclidean minimum spanning tree (eMST), which is a
+set of lines (branches) that connects all points in the minimum possible distance. Sub-populations
+are defined when the branches (line from a pair of points) distance is greater than the defined distance 
 (Rapoport suggests twice the mean edge distance (Willis et al. 2003)). 
-Area is defined as this tree buffer by defined distance (Rapoport suggests the mean) 
+Area is defined by  buffering this tree by a defined distance (Rapoport suggests the mean) 
 any isolated populations (single populations or points) are also buffered by this distance.
 }
 \examples{
 #Build and project some points
-thepoints <- squareOfPs(19,0.1)
+thepoints <- ptsSquare(19,0.1)
 names(thepoints) <- c("lat","long")
 thepoints <- simProjWiz(thepoints)
 #number of sub-populations/locations using default distances

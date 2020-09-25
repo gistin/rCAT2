@@ -13,7 +13,7 @@ deg2rad(deg)
 number
 }
 \description{
-Calculates radians from degrees or degrees from radians
+Calculates radians from degrees
 }
 \examples{
 a <- 30

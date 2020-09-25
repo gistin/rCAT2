@@ -6,19 +6,19 @@
 #' @title Euclidean Minimum spanning tree 
 #' @description
 #' Calculates the Euclidean Minimum spanning tree from a set of points. 
-#' This is used for the first part of Rapoport's (1982) mean propinquity method. 
+#' This is used for the  tree and branch building part of Rapoport's (1982) mean propinquity method. 
 #' 
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints dataframe of points in metres i.e. c(X,Y)
 #' @return Simple feature of linestring, with a df of X1,Y1,X2,Y2,distance and geom. N.B. X1,Y1 & and X2 Y2 are the to and from points 
 #' @note 
-#' EMST is computed from Computes Euclidean Minimum Spanning Trees (EMST) using the fast 
+#' EMST is computed from Euclidean Minimum Spanning Trees (EMST) using the fast 
 #' Dual-Tree Boruvka algorithm (March, Ram, Gray, 2010, <doi:10.1145/1835804.1835882>) implemented in 'mlpack' - the C++ Machine 
 #' Learning library (Curtin et al., 2013). 'emstreeR' R wrapped for these algorithms  from Allan Quadros & Andre Cancado 2019 
 #' https://cran.r-project.org/web/packages/emstreeR/index.html & https://github.com/allanvc/emstreeR
 #' @examples
 #'#Build and project some points
-#'thepoints <- squareOfPs(19,0.1)
+#'thepoints <- ptsSquare(19,0.1)
 #'names(thepoints) <- c("lat","long")
 #'thepoints <- simProjWiz(thepoints)
 #'#get the Euclidean Minimum spanning tree
@@ -66,27 +66,27 @@ eMST <- function (thepoints){
 #' @title Sub-population or number of locations using Rapoport's mean propinquity
 #' @description
 #' Calculates Rapoport's (1982) mean propinquity from a set of points. 
-#' Rapoport’s mean propinquity method (Willis et al. 2003, Rapoport 1982). This technique is
-#' based on a Euclidean minimum spanning tree (MST), which is a
-#' set of lines that connects all points in the minimum possible distance. Subpopulations
-#' are defined when the edge (line from a pair of points) distance is greater than the define distance 
+#' For details on Rapoport’s mean propinquity methodsee Willis et al. 2003 and Rapoport 1982. This technique is
+#' based on a Euclidean minimum spanning tree (eMST), which is a
+#' set of lines (branches) that connects all points in the minimum possible distance. Sub-populations
+#' are defined when the branches (line from a pair of points) distance is greater than the defined distance 
 #' (Rapoport suggests twice the mean edge distance (Willis et al. 2003)). 
-#' Area is defined as this tree buffer by defined distance (Rapoport suggests the mean) 
+#' Area is defined by  buffering this tree by a defined distance (Rapoport suggests the mean) 
 #' any isolated populations (single populations or points) are also buffered by this distance.
 #' 
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints dataframe of points in metres i.e. c(X,Y)
 #' @param barrierDis distance (in m) to be used to define barriers (if not defined the default is 2 x mean branch length of the Euclidean Minimum spanning tree). Rivers et al (2010) and Willis et al (2003) suggest 1/10 of the longest Axis may be useful.
 #' @param bufferDis distance (in m) to be used to buffer points and connected edges (if not defined the default is the mean branch length of the Euclidean Minimum spanning tree )
-#' @param returnV, switches to return different sets of results: 
-#' S = Simple, returns just the number of sub-populations or locations (default)
-#' AREA = returns the area (km2) of the buffered points and minimum spanning tree
-#' SF = returns a list with two simple features (tree and buffers) for visualisation, mapping and further analysis 
+#' @param returnV, switches to return different sets of results: \cr
+#' S = Simple, returns just the number of sub-populations or locations (default) \cr
+#' AREA = returns the area (km2) of the buffered points and tree \cr
+#' SF = returns a list with two simple features (tree and buffers) for visualisation, mapping, further analysis and export to a GIS
 #' @return dependent on switch, default is area in km2
 #' @return see returnV
 #' @examples
 #'#Build and project some points
-#'thepoints <- squareOfPs(19,0.1)
+#'thepoints <- ptsSquare(19,0.1)
 #'names(thepoints) <- c("lat","long")
 #'thepoints <- simProjWiz(thepoints)
 #'#number of sub-populations/locations using default distances

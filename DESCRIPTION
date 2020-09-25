@@ -12,13 +12,13 @@ Authors@R: c(person(given = "Justin",
            email = "S.Bachman@kew.org",
            comment = c(ORCID = "")))
 Depends: R (>= 3.3.0),
-Suggests: rgeos, rgbif (>= 0.9.2), knitr,rmarkdown, R.rsp,testthat,spelling
-Description: A set of tools and functions to help with species conservation assessments (Red List threat assessments). Includes Extent of occurrence, Area of Occupancy, Minimum Enclosing Rectangle, a geographic Projection Wizard and Species batch processing.
+Suggests: rgeos, rgbif (>= 0.9.2), knitr,rmarkdown, R.rsp,testthat,spelling,CoordinateCleaner
+Description: A set of tools and functions to help with species conservation assessments (Red List threat assessments). Includes Extent of occurrence(EOO), Area of Occupancy(AOO), subpopulation tools, a geographic Projection Wizard, Species batch processing and various other utilities.
 License: MIT + file LICENSE
-Imports: pracma (>= 1.9.5), rgdal (>= 1.2-5), sf (>= 0.9-5), grDevices (>= 3.3.2), ggplot2 
+Imports: pracma (>= 1.9.5), rgdal (>= 1.2-5), sf (>= 0.9-5), grDevices (>= 3.3.2), emstreeR, ggplot2, rnaturalearth 
 Encoding: UTF-8
 LazyData: true
 Language: en-US
 RoxygenNote: 7.1.0
 VignetteBuilder: knitr
-Date: 2020-07-01
+Date: 2020-09-25

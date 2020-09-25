@@ -15,7 +15,7 @@ ll2cart(latr, longr)
 dataframe of x,y,z
 }
 \description{
-Calculates the Cartesian cordinates (x,y,z) from lat long in radians
+Calculates the Cartesian coordinates (x,y,z) from lat long in radians. Used as part of the projection wizard.
 }
 \examples{
 lat <- runif (200,-24,-12)

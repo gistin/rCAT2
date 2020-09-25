@@ -2,7 +2,7 @@
 % Please edit documentation in R/Sub_loc_frag.R
 \name{subLocBuf}
 \alias{subLocBuf}
-\title{Sub-population or number of locations using buffer method}
+\title{Sub-population or number of locations using the buffer method}
 \usage{
 subLocBuf(
   thepoints,
@@ -15,23 +15,23 @@ subLocBuf(
 
 \item{bufferradius}{in metres, (default = 1/10 the longest axis of the set of points)}
 
-\item{returnV}{three switches for return values 
-S = simply the number of sub-pop or locations 
-AREA = returns the area of the buffered output
-SF = return the simple feature for plotting and mapping}
+\item{returnV}{three switches for return values \cr
+S = simply the number of sub-pop or locations \cr
+AREA = returns the area of the buffered output \cr
+SF = return the simple feature for plotting, mapping and export to a GIS}
 }
 \value{
 number of sub-pop/locations
 }
 \description{
-Calculates the number of Sub-population or number of locations from buffer method
+Calculates the number of Sub-population or number of locations using the buffer method
 }
 \note{
 Malin et al 2010 suggest buffer size of 1/10 the longest distance
 }
 \examples{
 #Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
-thepoints <- normalofPs(50,0.1)
+thepoints <- ptsNormal(50,0.1)
 #shift to Troodos mountaions
 thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
 #project the points

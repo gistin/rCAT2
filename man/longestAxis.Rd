@@ -18,7 +18,7 @@ distance in metres or two points for the longest distance
 Calculates the longest distances from a set of points
 }
 \note{
-Useful for scale for cellsize, Willis et al 2003 suggest 1/10 of this for cellsize for AOO calculations
+Useful as a scale for cellsize and location buffers, Willis et al 2003 suggest 1/10 of this for cellsize for AOO calculations as does Rivers et al (2010) for buffer distance for sub-population or location calculations.
 }
 \examples{
 x <- runif (20,0,10)

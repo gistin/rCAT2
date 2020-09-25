@@ -9,19 +9,19 @@ aHullMean(thepoints, multiple = 2, returnV = "S")
 \arguments{
 \item{thepoints}{dataframe of points in metres i.e. c(x,y)}
 
-\item{multiple}{multiple of the mean distance between point pairs, used to remove triangles from the convex hull (default=2)}
+\item{multiple}{multiple of the mean distance between point pairs, used to remove triangles from the set of Delaunay triangulations (default=2)}
 
-\item{returnV, }{switches to return different sets of results: 
-S = Simple, returns just the area in km2, (DEFAULT)
-SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to GIS systems
-ALL = returns a multipolygon of all the triangular elements of the alpha hull}
+\item{returnV, }{switches to return different sets of results: \cr
+S = Simple, returns just the area in km2, (DEFAULT) \cr
+SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to GIS systems \cr
+ALL = returns a multipolygon of all the triangular elements of the alpha hull \cr}
 }
 \value{
 dependent on switch, default is area in km2
 }
 \description{
-Calculates the Alpha hull from a set of points and m (multiple of the mean distance between points)
-Processing time for large dataset will be slow. uses sf's st_triangulate initially to build Delauney triangulation of all points 
+Calculates the Alpha hull from a set of points and (multiple of the mean distance between points)
+Processing time for large dataset will be slow. Uses sf's st_triangulate initially to build Delaunay triangulation of all points. 
 Algorithms derived from and for details of use see: 
 Burgman, M. A., & Fox, J. C. (2003). Bias in species range estimates from minimum convex polygons: implications for conservation and options for improved planning. Animal Conservation, 6(1), 19-28.
 }
@@ -30,7 +30,7 @@ Burgman, M. A., & Fox, J. C. (2003). Bias in species range estimates from minimu
 }
 \examples{
 #Build and project some points
-thepoints <- squareOfPs(19,0.1)
+thepoints <- ptsSquare(19,0.1)
 names(thepoints) <- c("lat","long")
 thepoints <- simProjWiz(thepoints)
 attr(thepoints,'crs')

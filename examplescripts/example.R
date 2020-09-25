@@ -26,8 +26,9 @@ eoo(thepoints)
 #plot this
 eeoploy <- eoo(thepoints,"SF")
 cplot <- ggplot(data=Cyprus) + geom_sf() + geom_sf(data=thepointsSF) + geom_sf(data=eeoploy,fill=NA,col='green')
+cplot
 #EOO rating
-eooRating(eoo(thepoints))
+ratingEoo(eoo(thepoints))
 #get AOO should be ~ 116 km2
 aoo(thepoints)
 #get AOO as cell polygons
@@ -36,11 +37,14 @@ aoopolys <- aoo(thepoints,2000,"SF")
 eooaooplot <- cplot + geom_sf(data=aoopolys,fill=NA,col='red')
 eooaooplot
 #get rating from aoo
-aooRating(aoo(thepoints),FALSE)
+ratingAoo(aoo(thepoints),FALSE)
 
 #interested in change in AOO or EOO?
 1-aooFixedGrid(thepoints[1:22,])/aooFixedGrid(thepoints)
 1-eoo(thepoints[1:22,])/eoo(thepoints)
+#rating from pop change note needs to be percentage
+ratingPop((1-aooFixedGrid(thepoints[1:10,])/aooFixedGrid(thepoints))*100)
+
 
 #how about the alpha hull? the default is to drop triangles with 2x the mean
 aHullMean(thepoints)
@@ -51,12 +55,12 @@ cplot + geom_sf(data=apoly,fill=NA,col='blue')
 cplot + geom_sf(data=aHullMean(thepoints,returnV = 'ALL'),fill=NA,col='blue')
 
 #######################################################
-#getting down to some detailed analysis for AOO and EOO
+#getting down to some detailed analysis
 #######################################################
 #build some data
 
-#Build some normally distributed point data around the Troodos mountains ~ 10 km diametre
-thepoints <- normalofPs(29,0.1)
+#Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
+thepoints <- ptsNormal(29,0.1)
 #TODO maybe think about make all upper case as SF objects???
 #shift to Troodos mountaions
 thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
@@ -77,7 +81,7 @@ myplot <- ggplot(data=simpleaoopoly) + geom_sf() + geom_point(data=ppts,aes(X,Y)
 myplot
 
 ####################
-#AOO with shift only
+#min AOO with shift only
 ####################
 #getting minimum AOO, but only by shifting
 minfixaoo <- aooFixedGrid(ppts,returnV = "SF")
@@ -87,7 +91,7 @@ aoofixall <- aooFixedGrid(ppts,returnV = "ALL")
 range(aoofixall$nofcells)
 ggplot(data=aoofixall) + geom_histogram(aes(nofcells))
 
-#want to review the maximum grid for fun?
+#want to review the maximum grid for fun? - sad I know
 maxgrid <- aoofixall[which.max(aoofixall$nofcells),]
 #we need to build the cells from the points, rotation and shifts
 maxpoly <- buildCellPolys_rxy(ppts,2000,maxgrid$rotation,maxgrid$xshift,maxgrid$yshift)
@@ -117,8 +121,8 @@ maxpolyrot <- buildCellPolys_rxy(ppts,2000,maxgrid$rotation,maxgrid$xshift,maxgr
 myplot + geom_sf(data=maxpolyrot, fill="#FF000044",colour='red')
 
 #let push it harder to find a smaller combination if possible. Increasing iteration by 10x will take a good 10+ seconds to run
-minpolyall <- aooFixedRotation(ppts,2000,12960,returnV = "ALL")
-#Looks like we can squeeze out one extra cell, not sure it was worth it!
+minpolyall <- aooFixedRotation(ppts,2000,10^4,returnV = "ALL")
+#you may have been able to squeeze out one extra cell, not sure it was worth it!
 # plot the min and max
 maxgrids <- minpolyall[which.max(minpolyall$nofcells),]
 mingrids <- minpolyall[which.min(minpolyall$nofcells),]
@@ -127,7 +131,20 @@ minpolyrots <- buildCellPolys_rxy(ppts,2000,mingrids$rotation,mingrids$xshift,mi
 ggplot (data=maxpolyrot) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=minpolyrots, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
 
 #report
-paste("first iterations gave", nrow(minpoly),". Second with xten iterations gave", nrow(minpolyrots),". Max was", nrow(maxpolyrots))
+paste("first iterations gave", nrow(minpoly),". Second with x10 iterations gave", nrow(minpolyrots),". Max was", nrow(maxpolyrots))
+
+############################
+#AOO using point buffer method
+############################
+#aoo area using default 2 km2 circles
+aooBuf(ppts)
+#aoo with 8 km2 area
+aooBuf(ppts,bufferradius=1596)
+#plot
+polysbuf <- aooBuf(ppts,bufferradius=1596,returnV="SF")
+myplot <- ggplot(data=polysbuf) + geom_sf() + geom_point(data=ppts,aes(X,Y))
+myplot
+
 
 ###############################
 #EOO
@@ -173,7 +190,7 @@ ggplot(data=subpop) + geom_sf() + geom_point(data=ppts,aes(X,Y))
 #user defined buffer distance in this case 2 km
 subLocBuf(ppts,bufferradius=2000,returnV="S")
 
-#with cell adjacency
+#with cell adjacency, use 1/10 width for default
 subLocGrid(ppts)
 #get area
 subLocGrid(ppts,returnV="AREA")
@@ -185,7 +202,7 @@ subLocGrid(ppts,neighborhood = "rook")
 #with user defined cellwidth
 subLocGrid(ppts,neighborhood = "rook",cellwidth = 2000)
 
-#with Alpha hulls
+#with Alpha hulls - not recogmented
 subLocAlpha(ppts)
 #get area
 subLocAlpha(ppts,returnV = "AREA")
@@ -197,6 +214,7 @@ ggplot(data=subpop) + geom_sf() + geom_point(data=ppts,aes(X,Y))
 
 #using Rapoports mean propinquity
 #number of sub-populations/locations using default distances
+#have a look at the EMST first (just)
 subLocRapoport(ppts)
 #defining your own distances
 subLocRapoport(ppts,barrierDis = 2000,bufferDis = 1000)
@@ -214,15 +232,15 @@ ggplot (data=sfs$tree) + geom_sf(aes(color=barrier)) + geom_sf(data=sfs$buffers,
 #############################
 #TD need to update points makings scripts to delivery X Y not x y
 #random square of points
-plot(squareOfPs(500,1000),asp=1)
+plot(ptsSquare(500,1000),asp=1)
 #random oval of points
-plot(ovalOfPs(500,1000,0.78,0.5),asp=1)
+plot(ptsOval(500,1000,0.78,0.5),asp=1)
 #Doughnut of points
-plot(doughnutOfPs(500,1000,0.6,0.5,0.4),asp=1)
+plot(ptsDoughnut(500,1000,0.6,0.5,0.4),asp=1)
 # Normally disturbed (but random within) set of points
-plot(normalofPs(500,1000),asp=1)
+plot(ptsNormal(500,1000),asp=1)
 #rotating points, mainly used for AOO, but maybe useful to others
-thepoints <- squareOfPs(200,0.1)
+thepoints <- ptsSquare(200,0.1)
 rpoints <- rotateP(thepoints,deg2rad(45))
 plot(rpoints,asp=1)
 
@@ -240,11 +258,11 @@ mer(ppts)
 
 #EMST MStree
 euMST <- eMST(ppts)
-ggplot (data=euMST) + geom_sf(colour="blue")+ geom_point(data=thepoints,aes(X,Y)) 
+ggplot (data=euMST) + geom_sf(colour="blue")+ geom_point(data=ppts,aes(X,Y)) 
 #ID Barriers using rapoport recommendations (mean x 2)
 meandis <- mean(euMST$distance)
 euMST$barrier <- euMST$distance > meandis * 2
-ggplot (data=euMST) + geom_sf(aes(colour=barrier)) + geom_point(data=thepoints,aes(X,Y))
+ggplot (data=euMST) + geom_sf(aes(colour=barrier)) + geom_point(data=ppts,aes(X,Y))
 
 
 #############################
@@ -257,16 +275,27 @@ long <- runif (200,34.8720,34.9720)
 mydata <- data.frame(taxa=c('aa','bb','cc','dd',"xx"),lat,long)
 
 #default get a dataframe of results and project all with the same project
-resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat)
+resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat)
 #project each species individually
-resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,project2gether = FALSE)
+resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat,project2gether = FALSE)
 #switch on aooMin
-resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
+resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
 #default to return Simple feature objects
-resultsf <- conBatch(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
+resultsf <- batchCon(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
 
 #plot all the EOO results
 ggplot(data=resultsf[resultsf$geom_cat=="eoo",]) + geom_sf(fill=NA)
 #pull one species and plot
 oneSp <- resultsf[resultsf$taxa=="aa",]
 ggplot(data=oneSp) + geom_sf(fill=NA)
+
+
+################################
+#Alphas and betas etc
+################################
+aooFixedGrido(ppts)
+aooFixedRotationo(ppts)
+#presently below crashes as NE is not working!!!!
+countrylist(ppts)
+
+

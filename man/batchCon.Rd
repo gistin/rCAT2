@@ -18,7 +18,7 @@ batchCon(
 \arguments{
 \item{taxa}{field which defines a list of species or taxa}
 
-\item{long}{field which defines the longtitude set of points}
+\item{long}{field which defines the longitude set of points}
 
 \item{lat}{field which defines the latitude set of points}
 
@@ -26,12 +26,12 @@ batchCon(
 
 \item{cellsize}{cell length in metres used to for AOO projection N.B. IUCN recommend 2000 m (default 2000)}
 
-\item{aooMin}{calls the aooMin routines as well as simple aoo, bewarned with lots of species this can take some time to run (default=FALSE)}
+\item{aooMin}{calls the aooMin routines as well as simple aoo, be warned with lots of species and points this can take some time to run (default=FALSE)}
 
-\item{it}{if aooMin=TRUE this determins the number of iterations it will run to find aooMin}
+\item{it}{if aooMin=TRUE this determines the number of iterations it will run to find aooMin (default=1296)}
 
-\item{returnV}{switches to return different sets of results: 
-S = simple returns a dataframe of results = (taxa ,Number of points,EOO in km2, Simple AOO in km2,Minimum AOO, EOO category, AOOcategory, Cellwidth, projection parameters)
+\item{returnV}{switches to return different sets of results: \cr
+S = simple returns a dataframe of results = (taxa ,Number of points,EOO in km2, Simple AOO in km2,Minimum AOO, EOO category, AOOcategory, Cellwidth, projection parameters) \cr
 SF = simple features dataframe will all results, taxa in taxa field, geometryclass=(EOO,AOO,points). NB all points will be projected together and aooMin is ignored}
 }
 \description{
@@ -52,7 +52,7 @@ species_y \tab -30.475000 \tab -129.99600\cr}
 etc
 }
 \note{
-Has a switch to either project all data as a whole or each taxa separately. I would suggest you use this switch if data is all from a similar area (i.e. all from one continent/country/region)
+Has a switch to either project all data as a whole or each taxa separately. We would suggest you use this switch if data is all from a similar area (i.e. all from one continent/country/region)
 }
 \examples{
 

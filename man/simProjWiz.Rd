@@ -11,26 +11,26 @@ simProjWiz(thepoints, thecentre, returnV = "S")
 
 \item{thecentre}{one point i.e. c(lat,long), if not specified this will be calculated from the center of gravity of all points}
 
-\item{returnV}{switches to return either  dataframe (x,y) or simple feature of points
-S = simple, returns as dataframe of x,y
+\item{returnV}{switches to return either  dataframe (x,y) or simple feature of points  \cr
+S = simple, returns as dataframe of x,y \cr
 SF = simple feature of points}
 }
 \value{
-Defaults is Set of points in meters as a dataframe with projection details attributed (stored as crs to retrieve attr(myprojectedpoints,'crs'))
+Defaults is a set of points in meters as a dataframe with projection details attributed (stored as crs to retrieve attr(myprojectedpoints,'crs'))
 }
 \description{
-Projects any set of lat long points to a "suitable" area projection, based on it's "true center of gravity" or user defined lat long.
-Data is expect as lat long in decimal degrees and returned in metres.
+Projects any set of latitude and longitude points to a "suitable" area projection, based on thieir "true centre of gravity".
+Data is expected as lat long in decimal degrees and returned in metres.
+Input data is checked to make sure it’s sensible before projection (i.e. lat and longs on the earth no null or NA values)
 }
 \note{
-Based around a simple continental projection, using two sets of projections
-equal area cylindrical = Cylindrical equal-area = 8287
-equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area
+Based around a simple continental projection, using two sets of projections \cr
+equal area cylindrical = Cylindrical equal-area \cr
+equal area azimuthal for polar (above 70) = Lambert azimuthal equal-area \cr
  
-note these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal analysis
-See Šavric et al for a more cartographically pleasing projection engine
-
-Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938
+NB these are not cartographically pleasing projections, they are just so we can get the data into something simple for areal and distance analysis.
+See Šavric et al for a more cartographically pleasing projection engine \cr
+Šavric, B., Jenny, B., Jenny, H., 2016. Projection Wizard – An Online Map Projection Selection Tool. Cartogr. J. 53, 1–9. doi:10.1080/00087041.2015.1131938 and https://projectionwizard.org/
 }
 \examples{
 lat <- runif (200,-24,-12)

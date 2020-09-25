@@ -2,7 +2,7 @@
 % Please edit documentation in R/Sub_loc_frag.R
 \name{subLocAlpha}
 \alias{subLocAlpha}
-\title{Sub-populations or locations using alpha hull method}
+\title{Sub-populations or locations using the alpha hull method}
 \usage{
 subLocAlpha(
   thepoints,
@@ -13,28 +13,29 @@ subLocAlpha(
 \arguments{
 \item{thepoints}{dataframe of points of x,y}
 
-\item{barrierDis}{in metres, (default = 1/10 the longest axis of the set of points)
-#' @param returnV four switches either 
-S = for simply the number of sub-pop or locations 
-AREA = returns the area of the cells (use aoo for useful areas)
-SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to GIS systems
+\item{barrierDis}{in metres, (default = 1/10 the longest axis of the set of points)}
+
+\item{returnV}{four switches either \cr
+S = for simply the number of sub-pop or locations \cr
+AREA = returns the area of the cells (use AOO or EOO for useful areas for IUCN assessment) \cr
+SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to a GIS  \cr
 ALL = returns a multipolygon of all the triangular elements of the alpha hull}
 }
 \value{
 number of sub-pop/locations
 }
 \description{
-Calculates the number of Sub-population or number of locations from alpha hull method
+Calculates the number of Sub-population or  locations using the alpha hull method
 }
 \note{
 Malin et al 2010 suggest barrier width of 1/10 the longest distance.
 
-As the barrier distance increases for Alpha hulls, point become outliners with no area. This algorithm returns the number of groups and the number of these outliner for the sub population or location number
+As the barrier distance increases for Alpha hulls, point become outliners with no area. This algorithm returns the number of grouped points (in the hull) and the number of these outlying points for the sub population or location calculations. 
 We would not recommend using Alpha hulls for sub populations or locations, but it is supplied here for consistency and for those that want to experiment.
 }
 \examples{
 #Build some normally distributed point data around the Troodos mountains ~ 10 km diameter
-thepoints <- normalofPs(50,0.1)
+thepoints <- ptsNormal(50,0.1)
 #shift to Troodos mountaions
 thepoints <- data.frame(long = thepoints$X + 32.8794, lat = thepoints$Y + 34.9220)
 #project the points

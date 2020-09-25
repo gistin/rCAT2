@@ -2,7 +2,7 @@
 % Please edit documentation in R/projWiz.R
 \name{llCheck}
 \alias{llCheck}
-\title{Check point data and lat long's are sensible}
+\title{Check point data and latitude and longitude are sensible to work with}
 \usage{
 llCheck(thepoints)
 }
@@ -14,6 +14,10 @@ nothing or warning or error
 }
 \description{
 Checked the dataframe for NA, latitude below -90 or above 90, longitude below -180 and above 180, also warns if it finds whole numbers or 0
+}
+\note{
+this used as a quick check to see if data can be worked with and are on the earth. 
+If coordinate cleaning is required we suggest you review https://cran.r-project.org/web/packages/CoordinateCleaner/index.html
 }
 \examples{
 # build dataframe
