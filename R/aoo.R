@@ -269,13 +269,30 @@ aooFixedRotation <- function(thepoints,cellsize=2000,it=1296,returnV="S",rotatio
 #' 
 #' Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., (2011). Supporting Red List threat assessments with GeoCAT: geospatial conservation assessment tool. Zookeys 126, 117–26. doi:10.3897/zookeys.150.2109 
 
-aoo <- function(thepoints,cellsize=2000,returnV="S"){
+aoo <- function(thepoints, cellsize=2000, returnV="S"){
   bottomleftpoints <- unique(floor(thepoints/cellsize))
-  cellp <- data.frame(x=(bottomleftpoints$X * cellsize), y=(bottomleftpoints$Y * cellsize))
-  if(returnV == "E"){return(list(area=nrow(cellp) * (cellsize^2)/1000000,nrow(cellp), rotation =0,
-                                 xshift= 0, yshift = 0))}
-  if(returnV == "SF"){buildCells(cellp,cellsize,0,0,0,attr(thepoints,'crs'))}
-  else{return(nrow(cellp) * (cellsize^2)/1000000)}
+  
+  cellp <- data.frame(
+    x=(bottomleftpoints$X * cellsize), 
+    y=(bottomleftpoints$Y * cellsize)
+  )
+  
+  if (returnV == "E") {
+    return(list(
+      area=nrow(cellp) * (cellsize^2)/1000000,
+      nocells=nrow(cellp), 
+      rotation=0,
+      xshift=0, 
+      yshift=0
+    ))
+  }
+  
+  
+  if (returnV == "SF") {
+    buildCells(cellp, cellsize, 0, 0, 0, attr(thepoints,'crs'))
+  } else {
+    return(nrow(cellp) * (cellsize^2)/1000000)
+  }
 }
 ###for consistency with old rCAT 0.1.6
 AOOsimp <- aoo
