@@ -81,7 +81,7 @@
 #' 
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 #' 
-eooMin <- function(thepoints,errorfield='R',defaultRadius=2000,returnV="S") {
+eooMin <- function(thepoints, errorfield='R', defaultRadius=2000, returnV="S") {
   #check error field exists if not add default
   if (any(colnames(thepoints)==errorfield)){
     #rename the field for next bits
@@ -91,8 +91,7 @@ eooMin <- function(thepoints,errorfield='R',defaultRadius=2000,returnV="S") {
   }
   #get EOO as sf
   eooPoly <- eoo(thepoints,"SF")
-  #just stops a warning, not sure why
-  st_agr(eooPoly) = "constant"
+  
   #get centroid as a matrix
   #NB need to check if centroid or true COG is better?
   midp <- as.numeric(st_coordinates(st_centroid(eooPoly)))
@@ -107,19 +106,32 @@ eooMin <- function(thepoints,errorfield='R',defaultRadius=2000,returnV="S") {
     innerPs[i,] <- c(ps[1],ps[2])
     outerPs[i,] <- c(ps[3],ps[4])
   }
-  ######need to chull this set again in case a point can be dropped, as it may no longer be on the edge
+  # need to chull this set again in case a point can be dropped, as it may no longer be on the edge
   innerPs <- innerPs[chull(innerPs),]
   outerPs <- outerPs[chull(outerPs),]
-  ###
-
   
-  if (returnV == "SF") {return(polyCon(innerPs,attr(thepoints,'crs')))}
-  if (returnV == "EX"){return(list(min = -polyarea(innerPs[,1],innerPs[,2])/1000000, max = -polyarea(outerPs[,1],outerPs[,2])/1000000))}
-  if (returnV == "SFA"){
-    minpoly <- polyCon(innerPs,attr(thepoints,'crs'))
-    maxpoly <- polyCon(outerPs,attr(thepoints,'crs'))
-    return(list(min=minpoly,max=maxpoly))}
-  -polyarea(innerPs[,1],innerPs[,2])/1000000
+  minArea <- -polyarea(innerPs[,1],innerPs[,2])/1000000
+  maxArea <- -polyarea(outerPs[,1],outerPs[,2])/1000000
+  
+  if (returnV == "SF") {
+    constructPolygon(innerPs, attr(thepoints,'crs'))
+  } else if (returnV == "EX") {
+    list(
+      min = minArea, 
+      max = maxArea
+    )
+  } else if (returnV == "SFA"){
+    minPoly <- constructPolygon(innerPs,attr(thepoints,'crs'))
+    maxPoly <- constructPolygon(outerPs,attr(thepoints,'crs'))
+    
+    st_sf(
+      measure=c("min", "max"),
+      eoo=c(minArea, maxArea),
+      geometry=c(minPoly, maxPoly)
+    )
+  } else {
+    minArea
+  }
 }
 
 ##########################################################
@@ -149,20 +161,23 @@ l_c_intercepts <- function(midp,edgepoint,R){
 ##########################################################
 #eoo polygon constructor
 #########################################################
-polyCon <- function(pointsmatrix,crs){
-  pointsdf <- data.frame(X=pointsmatrix[,1],Y=pointsmatrix[,2],id=1)
-  xys <- st_as_sf(pointsdf,coords=c("X","Y"))
-  poly <- st_sf(
-    aggregate(
-      xys$geometry,
-      list(xys$id),
-      function(g){
-        st_cast(st_combine(g),"POLYGON")
-      }
-    ))
-  #set crs
-  st_crs(poly) <- crs
-  return(poly)
+constructPolygon <- function(points, crs){
+  if (is.data.frame(points)) {
+    points <- as.matrix(points)
+  }
+  
+  # need to add first point again to close the polygon
+  points <- rbind(points, points[1,])
+  
+  geom <- st_polygon(list(points))
+  
+  # put geometry into an sfc so we can attach a crs
+  crs <- attr(points, "crs")
+  if (is.null(crs)) {
+    crs <- ""
+  }
+  
+  st_sfc(geom, crs=crs)
 }
 
 
@@ -198,28 +213,18 @@ polyCon <- function(pointsmatrix,crs){
 #' 
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 
-eoo <- function(thepoints,returnV="S") {
-  EOOpolyid <- chull(thepoints)
-  EOOpp <- thepoints[EOOpolyid,]
-  EOOpp$id <- 1
-  #construct polygons
-  if (returnV=="S"){return(-polyarea(x=EOOpp$X,y=EOOpp$Y)/1000000)
-    } else {
-    xys <- st_as_sf(EOOpp,coords=c("X","Y"))
-    poly <- st_sf(
-      aggregate(
-        xys$geometry,
-        list(xys$id),
-        function(g){
-          st_cast(st_combine(g),"POLYGON")
-        }
-      ))
-    if (is.null(attr(thepoints,'crs'))){
-      attr(thepoints,'crs') <- ''
-      warning('Projection not set, it will be set to null')
-    }
-    st_crs(poly) <- attr(thepoints,'crs')
-    return(poly)
+eoo <- function(points, returnV="S") {
+  hull_idx <- chull(points)
+  hull <- points[hull_idx,]
+  
+  area <- polyarea(x=hull$X, y=hull$Y)
+  # hull is constructed backwards, so area is negative and in m^2
+  area <- -1 * area / 1e6
+  
+  if (returnV == "S") {
+    area
+  } else {
+    constructPolygon(hull)
   }
 } 
 
