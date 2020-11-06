@@ -25,5 +25,5 @@ test_that("cells can be plotted", {
   )
   
   cells <- buildCells(cell_coords, 100, 0, 0, 0, crs=4628)
-  expect_success(plot(cells))
+  expect_error(plot(cells), NA)
 })

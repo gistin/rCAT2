@@ -17,7 +17,7 @@ test_that("returned polygon can be plotted", {
   
   poly_sf <- polyCon(points, 4268)
   
-  expect_success(plot(poly_sf))
+  expect_error(plot(poly_sf), NA)
 })
 
 test_that("errors if bad crs provided", {

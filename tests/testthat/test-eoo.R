@@ -53,5 +53,5 @@ test_that("returned sf can be plotted", {
   
   eoo_sf <- eoo(points, returnV="SF")
   
-  expect_success(plot(eoo_sf))
+  expect_error(plot(eoo_sf), NA)
 })
