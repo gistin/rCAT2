@@ -177,7 +177,13 @@ constructPolygon <- function(points, crs){
     crs <- ""
   }
   
-  st_sfc(geom, crs=crs)
+  polygon <- st_sfc(geom, crs=crs)
+  
+  if (is.na(st_crs(polygon))) {
+    warning("No valid CRS provided so setting it to `NA`")
+  }
+  
+  polygon
 }
 
 
@@ -224,6 +230,7 @@ eoo <- function(points, returnV="S") {
   if (returnV == "S") {
     area
   } else {
+    hull <- hull[,c("X", "Y")]
     constructPolygon(hull)
   }
 } 
