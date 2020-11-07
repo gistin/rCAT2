@@ -114,15 +114,15 @@ eooMin <- function(thepoints, errorfield='R', defaultRadius=2000, returnV="S") {
   maxArea <- -polyarea(outerPs[,1],outerPs[,2])/1000000
   
   if (returnV == "SF") {
-    constructPolygon(innerPs, attr(thepoints,'crs'))
+    constructPolygon(innerPs[, 1], innerPs[, 2], attr(thepoints,'crs'))
   } else if (returnV == "EX") {
     list(
       min = minArea, 
       max = maxArea
     )
   } else if (returnV == "SFA"){
-    minPoly <- constructPolygon(innerPs,attr(thepoints,'crs'))
-    maxPoly <- constructPolygon(outerPs,attr(thepoints,'crs'))
+    minPoly <- constructPolygon(innerPs[, 1], innerPs[, 2], attr(thepoints,'crs'))
+    maxPoly <- constructPolygon(outerPs[, 1], outerPs[, 2], attr(thepoints,'crs'))
     
     st_sf(
       measure=c("min", "max"),
@@ -158,21 +158,22 @@ l_c_intercepts <- function(midp,edgepoint,R){
   return(c(Fx,Fy,Gx,Gy))
 }
 
-##########################################################
-#eoo polygon constructor
-#########################################################
-constructPolygon <- function(points, crs){
-  if (is.data.frame(points)) {
-    points <- as.matrix(points)
-  }
+#' Construct a polygon from vertices.
+#' 
+#' Accepts an x and a y vector to define the vertices of
+#' the polygon, to make it easier 
+constructPolygon <- function(x, y, crs){
+  points <- cbind(x, y)
   
-  # need to add first point again to close the polygon
-  points <- rbind(points, points[1,])
+  is_closed <- all(points[1,] == points[nrow(points),])
+  
+  if (! is_closed) {
+    points <- rbind(points, points[1,])  
+  }
   
   geom <- st_polygon(list(points))
   
   # put geometry into an sfc so we can attach a crs
-  crs <- attr(points, "crs")
   if (is.null(crs)) {
     crs <- ""
   }
@@ -230,8 +231,7 @@ eoo <- function(points, returnV="S") {
   if (returnV == "S") {
     area
   } else {
-    hull <- hull[,c("X", "Y")]
-    constructPolygon(hull)
+    constructPolygon(hull$X, hull$Y, attr(points, "crs"))
   }
 } 
 
