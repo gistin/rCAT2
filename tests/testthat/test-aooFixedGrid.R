@@ -46,7 +46,7 @@ test_that("returns sf polygon", {
   
   aoo_poly <- aooFixedGrid(points, cellsize=1000, returnV="SF")
   
-  expect_s3_class(aoo_poly$geometry[[1]], "POLYGON")
+  expect_s3_class(aoo_poly[[1]], "POLYGON")
 })
 
 test_that("full results dataframe has right number of rows", {
