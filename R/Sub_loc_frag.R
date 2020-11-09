@@ -38,18 +38,20 @@
 #' Willis, F., Moat, J., & Paton, A. (2003). Defining a role for herbarium data in Red List assessments: a case study of Plectranthus from eastern and southern tropical Africa. Biodiversity & Conservation, 12(7), 1537-1552.
 #' @seealso \code{\link{longestAxis}} to calculate the length of the longest axis
 
-subLocBuf <- function (thepoints,bufferradius=longestAxis(thepoints,returnV='S')/10,returnV="S"){
-  thepointsSF <- st_as_sf(thepoints, coords = c("X", "Y"),crs= attr(thepoints,'crs'))
-  buf <- st_union(st_buffer(thepointsSF,bufferradius))
-  polys <- st_cast(buf,"POLYGON")
-  if(returnV=="SF"){return (polys)}
-  if(returnV=="AREA"){
-    parea <- sum(st_area(polys))
-    units(parea) <- "km^2"
-    return(parea)
+subLocBuf <- function (thepoints, bufferradius=longestAxis(thepoints,returnV='S')/10, returnV="S"){
+  thepointsSF <- st_as_sf(thepoints, coords = c("X", "Y"), crs=attr(thepoints, 'crs'))
+  buf <- st_union(st_buffer(thepointsSF, bufferradius))
+  
+  if (returnV == "AREA") {
+    area <- st_area(buf)
+    
+    units(area) <- "km^2"
+    area
+  } else if (returnV == "SF") {
+    st_cast(buf, "POLYGON")
+  } else {
+    length(st_cast(buf, "POLYGON"))
   }
-  #message(bufferradius)
-  length(polys)
 }
 
 ##################################################################################
@@ -95,21 +97,24 @@ subLocBuf <- function (thepoints,bufferradius=longestAxis(thepoints,returnV='S')
 #' @seealso \code{\link{aooFixedGrid}} to calculate optimal AOO on a non-rotating grid or
 #' @seealso \code{\link{aooFixedRotation}}to calculate optimal AOO with rotation and shift
 
-subLocGrid <- function (thepoints,cellwidth=longestAxis(thepoints,returnV='S')/10,neighborhood="queen",returnV="S"){
-  simpleaoopoly <- aoo(ppts,cellsize=cellwidth, returnV = "SF")
+subLocGrid <- function (thepoints, cellwidth=longestAxis(thepoints,returnV='S')/10, neighborhood="queen", returnV="S"){
+  simpleaoopoly <- aoo(thepoints, cellsize=cellwidth, returnV = "SF")
   if (neighborhood == "rook"){
-    subp <- st_cast(st_union(simpleaoopoly),"POLYGON")
+    subp <- st_union(simpleaoopoly)
   } else {
-    buf <- st_buffer(simpleaoopoly,cellwidth/10000)
-    subp <- st_cast(st_union(buf),"POLYGON")
+    buf <- st_buffer(simpleaoopoly, cellwidth/10000)
+    subp <- st_union(buf)
   }
-  if(returnV=="SF"){return (subp)}
-  if(returnV=="AREA"){
-    parea <- sum(st_area(subp))
-    units(parea) <- "km^2"
-    return(parea)
+  
+  if (returnV == "AREA") {
+    area <- st_area(subp)
+    units(area) <- "km^2"
+    area
+  } else if (returnV == "SF") {
+    st_cast(subp, "POLYGON")
+  } else {
+    length(st_cast(subp, "POLYGON"))
   }
-  length(subp)
 }
 
 
