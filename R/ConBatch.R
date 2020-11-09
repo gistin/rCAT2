@@ -68,83 +68,79 @@
 #' @export
 
 batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALSE,it=1296, returnV='S'){
-  #taxa <- mydata$taxa
-  #long <- mydata$long
-  #lat <- mydata$lat
-  #project2gether=FALSE
-  
-  #project all either when specified of when returning sf's
-  if(project2gether || returnV=="SF"){
-    mypointsxy <- simProjWiz(data.frame(lat,long))
-    mypointsxy$taxa <- taxa
-  } else {
-    mypointsll <- data.frame(taxa,lat,long)
+  if (returnV == "SF") {
+    project2gether = TRUE
   }
-  #taxa list for loop
-  taxalist <- unique(taxa)
   
-  #return SF if asked for
+  points <- data.frame(lat, long)
+  
+  if (project2gether) {
+    points <- simProjWiz(points)
+  }
+  
+  split_points <- split(points, f=taxa)
+  
   if(returnV=='SF'){
-    resultsf <- st_sf(st_sfc(crs = attr(mypointsxy,'crs')))  
-    for (thetaxa in taxalist){
-      #project one at a time
-      ppts <- mypointsxy[mypointsxy$taxa==thetaxa,]
-      ppts <- ppts[1:2]
-      attr(ppts,'crs') <- attr(mypointsxy,'crs')
-      #do the work
-      eoopoly <- eoo(ppts,"SF")
-      aoopolys <- aoo(ppts,cellsize,"SF")
-      #build the points
-      mpts = st_sf(geometry = st_sfc(st_multipoint(data.matrix(ppts))), crs = attr(mypointsxy,'crs'))
-      eoopoly$geom_cat <- "eoo"
-      aoopolys$geom_cat <- "aoo"
-      #setup the points data so it matches above
-      mpts$geom_cat <- "points"
-      mpts$Group.1 <- 1
-      #bind
-      temp <- rbind(eoopoly,aoopolys,mpts)
-      #add species name
-      temp$taxa <- thetaxa
-      resultsf <- rbind(resultsf,temp)
-      
+    crs <- attr(points, "crs")
+    ntaxa <- length(unique(taxa))
+    
+    eoo_geoms <- lapply(split_points, function(p) eoo(p, "SF"))
+    aoo_geoms <- lapply(split_points, function(p) aoo(p, cellsize, "SF"))
+    aoo_geoms <- lapply(aoo_geoms, function(g) st_sfc(st_multipolygon(g), crs=crs))
+    point_geoms <- lapply(split_points, function(p) st_sfc(st_multipoint(data.matrix(p)), crs=crs))
+    
+    geoms <- c(
+      do.call(c, eoo_geoms),
+      do.call(c, aoo_geoms),
+      do.call(c, point_geoms)
+    )
+    
+    results <- st_sf(
+      taxon=rep(unique(taxa), 3),
+      type=c(rep("eoo", ntaxa), rep("aoo", ntaxa), rep("points", ntaxa)),
+      geometry=geoms
+    )
+    
+  } else {
+    if (! project2gether) {
+      split_points <- lapply(split_points, simProjWiz)
+      proj_strings <- lapply(split_points, function(p) attr(p, "crs"))
+      proj_strings <- do.call(c, proj_strings)
+    } else {
+      proj_strings <- attr(points, "crs")
     }
-    return(resultsf)
+    
+    n_points <- lapply(split_points, nrow)
+    eoo_areas <- lapply(split_points, eoo)
+    eoo_ratings <- lapply(eoo_areas, ratingEoo)
+    aoo_areas <- lapply(split_points, function(p) aoo(p, cellsize))
+    
+    if (aooMin) {
+      min_aoo_areas <- lapply(split_points, function(p) aooFixedRotation(p, cellsize, it))
+      aoo_ratings <- lapply(min_aoo_areas, ratingAoo)
+    } else {
+      aoo_ratings <- lapply(aoo_areas, ratingAoo)
+    }
+    
+    results <- data.frame(
+      taxon=unique(taxa),
+      NOP=do.call(c, n_points),
+      EOOkm2=do.call(c, eoo_areas),
+      AOOkm=do.call(c, aoo_areas),
+      EOOcat=do.call(c, eoo_ratings),
+      AOOcat=do.call(c, aoo_ratings),
+      cellwidth=cellsize,
+      proj_metadata=proj_strings
+    )
+    
+    if (aooMin) {
+      min_aoo_areas <- lapply(split_points, function(p) aooFixedRotation(p, cellsize, it))
+      results$MinAOO <- do.call(c, min_aoo_areas)
+    }
+    
   }
   
-  
-  #dataframe to store results
-  resultsdf<- data.frame(taxa=character(),NOP=integer(),EOOkm2=double(),
-                         AOOkm=double(),MinAOO=double(),EOOcat=character(),
-                         AOOcat=character(),cellwidth=integer(),proj_metadata=character(),
-                         stringsAsFactors=FALSE)
-  
-  
-  for (thetaxa in taxalist){
-    #project one at a time
-    if(!project2gether){
-      pptll <- mypointsll[mypointsll$taxa==thetaxa,]
-      ppts <- simProjWiz(data.frame(lat=pptll$lat,long=pptll$long))
-    } else {
-      ppts <- mypointsxy[mypointsxy$taxa==thetaxa,]
-      ppts <- ppts[1:2]
-      attr(ppts,'crs') <- attr(mypointsxy,'crs')
-    }
-    #do the work
-    eooarea <- eoo(ppts)
-    ratingEootxt <- ratingEoo(eooarea)
-    aooarea <- aoo(ppts,cellsize)
-    ratingAootxt <- ratingAoo(aooarea)
-    if(aooMin){
-      minaooarea <- aooFixedRotation(ppts,cellsize,it)
-      ratingAootxt <- ratingAoo(minaooarea)
-    } else {
-      minaooarea <- NA
-    }
-    resultsdf[nrow(resultsdf)+1,] <- c(thetaxa, nrow(ppts), eooarea,
-                                       aooarea, minaooarea, ratingEootxt,
-                                       ratingAootxt, cellsize, attr(ppts,'crs'))
-  }
-  return(resultsdf)
+  results
 }
 ##############
 
