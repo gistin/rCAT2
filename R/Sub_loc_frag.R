@@ -159,60 +159,48 @@ subLocGrid <- function (thepoints, cellwidth=longestAxis(thepoints,returnV='S')/
 #' @seealso \code{\link{longestAxis}} to calculate the length of the longest axis
 #' @seealso \code{\link{aHullMean}} to calculate the alpha hull using multiples of the mean lengths of the Delaunay triangulation
 #' @note 
-#' As the barrier distance increases for Alpha hulls, point become outliners with no area. This algorithm returns the number of grouped points (in the hull) and the number of these outlying points for the sub population or location calculations. 
+#' As the barrier distance increases for Alpha hulls, point become outliers with no area. This algorithm returns the number of grouped points (in the hull) and the number of these outlying points for the sub population or location calculations. 
 #' We would not recommend using Alpha hulls for sub populations or locations, but it is supplied here for consistency and for those that want to experiment.
 
-subLocAlpha <- function (thepoints,barrierDis=longestAxis(thepoints,returnV='S')/10,returnV="S") {
-  x <- cbind(thepoints$X,thepoints$Y)
-  mp <- st_multipoint(x)
-  mpm <- st_sfc(mp)
-  st_crs(mpm)<- attr(thepoints,'crs')
-  #build Delauney triangulation from sf package
-  del <- st_triangulate(mp)
-  #run through each triangle and get lengths
-  t <- numeric()
-  ind <- 0
-  for (i in 1:length(del)){
-    plist <- del[i][[1]][[1]]
-    p1 <- st_point(plist[1,])
-    p2 <- st_point(plist[2,])
-    p3 <- st_point(plist[3,])
-    t[3*i-2] <- st_distance(p1,p2)
-    t[3*i-1] <- st_distance(p2,p3)
-    t[3*i] <-  st_distance(p3,p1)
-  }
-  tridel_indexes <- unique(ceiling((which((t > barrierDis) %in% TRUE))/3))
-  #if no triangle to remove then return normal convex hull
-  if (length(tridel_indexes)==0) {
-    ahullpoly <- st_union(del,del)
+subLocAlpha <- function (thepoints, barrierDis=longestAxis(thepoints,returnV='S')/10, returnV="S") {
+  crs <- attr(thepoints, "crs")
+  
+  triangles <- alphaTriangles(thepoints$X, thepoints$Y, crs=crs)
+  
+  distances <- lapply(triangles, calculateDistances)
+  
+  # get logical mask of triangles to keep
+  keep_triangle <- sapply(distances, function(x) all(x <= barrierDis))
+  
+  if (returnV == 'SF') {
+    st_union(triangles[keep_triangle])
+  } else if (returnV == 'ALL') {
+    polys <- st_multipolygon(triangles[keep_triangle])
+    st_sfc(polys, crs=crs)
+  } else if (returnV == "AREA") {
+    hull <- st_union(triangles[keep_triangle])
+    area <- st_area(hull) 
+    
+    if (is.null(attr(area, "units"))) {
+      area <- area / 1e6
+    }
+    
+    units(area) <- "km^2"
+    area
   } else {
-    polys <- st_multipolygon(del[-tridel_indexes])
-    ahullpoly <- st_union(polys,polys)
+    # number of subpopulations is the number of polygons
+    # plus number of points outside of hull
+    
+    hull <- st_union(triangles[keep_triangle])
+    point_sf <- st_as_sf(thepoints, coords=c("X", "Y"), crs=crs)
+    
+    in_hull <- st_intersects(point_sf, hull, sparse=FALSE)
+    
+    outliers <- sum(! in_hull)
+    groups <- length(hull)
+    
+    outliers + groups
   }
-  if (is.null(attr(thepoints,'crs'))){
-    attr(thepoints,'crs') <- ''
-    warning('Projection not set, it will be set to null')
-  }
-  ahullpoly <- st_sfc(ahullpoly)
-  polys <- st_sfc(polys)
-  st_crs(ahullpoly) <- attr(thepoints,'crs')
-  st_crs(polys) <- attr(thepoints,'crs')
-  #st_crs(ahullpoly, proj4text = attr(thepoints,'crs'))
-  if (returnV=='SF'){return(ahullpoly)}
-  if (returnV=='ALL'){return(polys)}
-  if(returnV=="AREA"){
-    parea <- st_area(ahullpoly)
-    units(parea) <- "km^2"
-    return(parea)
-  }
-  #get number of sub populations etc
-  ip <- st_intersection (ahullpoly,mpm)
-  #number of points used
-  nopused <- length(st_geometry(ip)[[1]])/2
-  #and therefore not used
-  outliers <- nrow(thepoints) - nopused
-  groups <- length(st_geometry(ahullpoly)[[1]])
-  return(outliers + groups)
 }
 
 

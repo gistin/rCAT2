@@ -176,5 +176,44 @@ ptsNormal <- function(nop=100,gsize=1){
   return (df)
 }
 
+#' Calculate Delauney triangles for alpha hull.
+#' 
+#' Performs Delauney triangulation on the provided points
+#' and returns the triangles as a simple features collection.
+#' 
+#' @export
+alphaTriangles <- function(x, y, crs) {
+  
+  if (is.null(crs)) {
+    crs <- ""
+  }
+  
+  #convert to matrix
+  points <- cbind(x, y)
+  points_geom <- st_multipoint(points)
+  points_collection <- st_sfc(points_geom, crs=crs)
+  
+  if (is.na(st_crs(points_collection))) {
+    warning("Missing CRS, assuming projection is in metres.")
+  }
+  
+  #build Delauney triangulation from sf package
+  del <- st_triangulate(points_collection)
+  
+  st_cast(st_sfc(del))
+}
+
+#' Calculate the distance between all vertices of a triangle
+#' 
+#' This is a utility to calculate the edge lengths of a triangle
+#' in a Delauney triangulation.
+#' 
+#' @export
+calculateDistances <- function(triangle) {
+  points <- st_cast(st_sfc(triangle), "POINT")
+  d_mat <- st_distance(points)
+  d_mat[col(d_mat) == row(d_mat) + 1] 
+}
+
 
 

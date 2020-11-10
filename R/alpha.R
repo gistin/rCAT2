@@ -37,50 +37,37 @@
 #' @import sf
 #' @references
 #' Burgman, M. A., & Fox, J. C. (2003). Bias in species range estimates from minimum convex polygons: implications for conservation and options for improved planning. Animal Conservation, 6(1), 19-28.
-
-
-
-aHullMean <- function(thepoints,multiple=2,returnV='S') {
-  #convert to matrix
-  x <- cbind(thepoints$X,thepoints$Y)
-  mp <- st_multipoint(x)
-  #build Delauney triangulation from sf package
-  del <- st_triangulate(mp)
-  #run through each triangle and get lengths
-  t <- numeric()
-  ind <- 0
-  for (i in 1:length(del)){
-    plist <- del[i][[1]][[1]]
-    p1 <- st_point(plist[1,])
-    p2 <- st_point(plist[2,])
-    p3 <- st_point(plist[3,])
-    t[3*i-2] <- st_distance(p1,p2)
-    t[3*i-1] <- st_distance(p2,p3)
-    t[3*i] <-  st_distance(p3,p1)
-  }
-  #calculate the mean
-  meand <- mean(t)
-  #work out the triangles that are going to be deleted
-  #get the index of the polygons which are greater
-  #NB /3 and ceiling to get to index of triangles
-  tridel_indexes <- unique(ceiling((which((t > meand*multiple) %in% TRUE))/3))
-  #if no triangle to remove then return normal convex hull
-  if (length(tridel_indexes)==0) {
-    ahullpoly <- st_union(del,del)
+#'
+aHullMean <- function(thepoints, multiple=2, returnV='S') {
+  crs <- attr(thepoints, "crs")
+  
+  triangles <- alphaTriangles(thepoints$X, thepoints$Y, crs=crs)
+  
+  distances <- lapply(triangles, calculateDistances)
+  
+  #calculate the overall mean
+  mean_distance <- mean(do.call(c, distances))
+  threshold <- mean_distance * multiple
+  
+  # get logical mask of triangles to keep
+  keep_triangle <- sapply(distances, function(x) all(x <= threshold))
+  
+  if (returnV == 'SF') {
+    st_union(triangles[keep_triangle])
+  } else if (returnV == 'ALL') {
+    polys <- st_multipolygon(triangles[keep_triangle])
+    st_sfc(polys, crs=crs)
   } else {
-    polys <- st_multipolygon(del[-tridel_indexes])
-    ahullpoly <- st_union(polys,polys)
+    # assumes CRS is set
+    hull <- st_union(triangles[keep_triangle])
+    area <- st_area(hull) 
+    
+    if (is.null(attr(area, "units"))) {
+      area <- area / 1e6
+    }
+    
+    units(area) <- "km^2"
+    area
   }
-  if (is.null(attr(thepoints,'crs'))){
-    attr(thepoints,'crs') <- ''
-    warning('Projection not set, it will be set to null')
-  }
-  ahullpoly <- st_sfc(ahullpoly)
-  polys <- st_sfc(polys)
-  st_crs(ahullpoly) <- attr(thepoints,'crs')
-  st_crs(polys) <- attr(thepoints,'crs')
-  #st_crs(ahullpoly, proj4text = attr(thepoints,'crs'))
-  if (returnV=='SF'){return(ahullpoly)}
-  if (returnV=='ALL'){return(polys)}
-  return(as.numeric(st_area(ahullpoly)/1000000))
 }
+
