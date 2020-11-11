@@ -44,19 +44,34 @@
 #' 
 #' Rapoport E.H. 1982. Areography: Geographical Strategies of Species. Pergamon Press, New York.
 #' @seealso \code{\link{subLocRapoport}} Rapoport's mean propinquity methods
-
+#'
 eMST <- function (thepoints){
-  edges <- nrow(thepoints)- 1
-  cmst <- ComputeMST (thepoints,verbose = FALSE)[1:edges,3:5] #drops the last point and the X/Y's
-  #build the simple feature, probably better ways of doing this, but it works
-  from <- thepoints[cmst$from,]
-  to <- thepoints[cmst$to,]
-  df <- cbind(from,to,cmst$distance)
-  names(df) <- c("X1","Y1","X2","Y2","distance")
-  df$geom <- st_sfc(sapply(1:nrow(df),function(i){st_linestring(t(matrix(unlist(df[i,1:4]), 2, 2)))},simplify = FALSE))
-  sfmst <- st_sf(df)
-  st_crs(sfmst) <- attr(thepoints,'crs')
-  sfmst
+  crs <- attr(thepoints, "crs")
+  
+  edges <- nrow(thepoints) - 1
+  cmst <- ComputeMST(thepoints, verbose=FALSE)
+  cmst <- cmst[1:edges, 3:5] #drops the last point and the X/Y's
+  
+  # not sure this is the best way, but hopefully clear
+  line_idx <- split(cmst, f=1:nrow(cmst))
+  
+  lines <- lapply(line_idx, function(idx) {
+    p1 <- c(thepoints[idx$from,]$X, thepoints[idx$from,]$Y)
+    p2 <- c(thepoints[idx$to,]$X, thepoints[idx$to,]$Y)
+    
+    st_linestring(rbind(p1, p2))
+  })
+  
+  lines <- st_sfc(lines, crs=crs)
+  
+  st_sf(
+    X1=thepoints[cmst$from,]$X,
+    Y1=thepoints[cmst$from,]$Y,
+    X2=thepoints[cmst$to,]$X,
+    Y2=thepoints[cmst$to,]$Y,
+    distance=cmst$distance,
+    geometry=lines
+  )
 }
 
 
@@ -119,8 +134,7 @@ eMST <- function (thepoints){
 #' Rapoport E.H. 1982. Areography: Geographical Strategies of Species. Pergamon Press, New York. 
 #' @seealso \code{\link{eMST}} Euclidean Minimum spanning tree 
 #' @seealso \code{\link{longestAxis}} Longest distance from a set of points 
-
-
+#'
 subLocRapoport <- function(thepoints,barrierDis,bufferDis,returnV='S'){
   #get the eMST
   euMST <- eMST(thepoints)
@@ -135,11 +149,20 @@ subLocRapoport <- function(thepoints,barrierDis,bufferDis,returnV='S'){
   ppts_sf <- st_as_sf(thepoints, coords = c("X", "Y"), crs = attr(thepoints,'crs'))
   point_area <- st_union(st_buffer(ppts_sf,bufferDis))
   pop_poly <- st_union(branch_area,point_area)
-  if (returnV=='SF'){return(list(tree=euMST,buffers=pop_poly))}
-  if (returnV=='AREA'){
+  
+  if (returnV == 'SF') {
+    list(tree=euMST, buffers=pop_poly)
+  } else if (returnV == 'AREA') {
     parea <- st_area(pop_poly)
-    units(parea) <- "km^2"
-    return(parea)
+    
+    if (is.null(attr(area, "units"))) {
+      area <- area / 1e6
     }
-  return(length(st_geometry(pop_poly)[[1]]))
+    
+    units(parea) <- "km^2"
+    parea
+  } else {
+    polygons <- st_cast(pop_poly, "POLYGON")
+    length(polygons)
+  }
 }
