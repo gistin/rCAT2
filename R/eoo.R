@@ -221,6 +221,10 @@ constructPolygon <- function(x, y, crs){
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 
 eoo <- function(points, returnV="S") {
+  if (! "X" %in% colnames(thepoints) | ! "Y" %in% colnames(thepoints)) {
+    stop("Point coordinates must be supplied in columns named 'X' and 'Y'.")
+  }
+  
   hull_idx <- chull(points)
   hull <- points[hull_idx,]
   
