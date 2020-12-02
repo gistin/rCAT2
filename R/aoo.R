@@ -633,28 +633,19 @@ buildCellPolys <- function (llcorners,cellsize){
 ###########################################################
 #internal called from main scripts
 
-buildCells <- function (llcorners,cellsize,rot=0,shiftx=0,shifty=0,crstxt){
+buildCells <- function (llcorners, cellsize, rot=0, shiftx=0, shifty=0, crs=""){
   #build cells 
   mincells <- buildCellPolys(as.data.frame(llcorners),cellsize)
   #rotate these back to original point orientation
-  cells <- rotateP(mincells[,2:3],rot)
+  cells <- rotateP(mincells[, 2:3], rot)
   #shift
   cells$x <- cells$x + shiftx
   cells$y <- cells$y + shifty
-  #Add ID
-  cells$id <- mincells$id
-  ###cells is a df which ggplot can read, below make them sf spatial objects
-  xys <- st_as_sf(cells,coords=c("x","y"))
-  polys <- st_sf(
-    aggregate(
-      xys$geometry,
-      list(xys$id),
-      function(g){
-        st_cast(st_combine(g),"POLYGON")
-      }
-    ))
-  st_crs(polys) <- crstxt
-  return(polys)
+  
+  cell_list <- split(cells, f=mincells$id)
+  poly_list <- lapply(cell_list, function(x) constructPolygon(x$x, x$y, crs))
+  
+  do.call(c, poly_list)
 }
 
 

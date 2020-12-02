@@ -25,16 +25,16 @@ test_that("calculates km-squared correctly", {
   expect_equal(eoo(points, returnV="S"), 1)
 })
 
-test_that("returns sf class for polygon mode", {
+test_that("returns sfc class for polygon mode", {
   points <- data.frame(
     X=c(0,1000,0,1000),
     Y=c(0,0,1000,1000)
   )
   
-  expect_s3_class(eoo(points, returnV="SF"), "sf")
+  expect_s3_class(eoo(points, returnV="SF"), "sfc_POLYGON")
 })
 
-test_that("returns an sf with a polygon geometry", {
+test_that("returns an sfc geometry polygon", {
   points <- data.frame(
     X=c(0,1000,0,1000),
     Y=c(0,0,1000,1000)
@@ -42,7 +42,7 @@ test_that("returns an sf with a polygon geometry", {
   
   eoo_sf <- eoo(points, returnV="SF")
   
-  expect_s3_class(eoo_sf$geometry[[1]], "POLYGON")
+  expect_s3_class(eoo_sf[[1]], "POLYGON")
 })
 
 test_that("returned sf can be plotted", {
@@ -53,5 +53,5 @@ test_that("returned sf can be plotted", {
   
   eoo_sf <- eoo(points, returnV="SF")
   
-  expect_success(plot(eoo_sf))
+  expect_error(plot(eoo_sf), NA)
 })

@@ -5,7 +5,7 @@ test_that("returns polygons", {
   )
   
   cells <- buildCells(cell_coords, 100, 0, 0, 0, crs=4628)
-  expect_s3_class(cells$geometry[[1]], "POLYGON")
+  expect_s3_class(cells[[1]], "POLYGON")
 })
 
 test_that("cells have the specified CRS", {
@@ -25,5 +25,5 @@ test_that("cells can be plotted", {
   )
   
   cells <- buildCells(cell_coords, 100, 0, 0, 0, crs=4628)
-  expect_success(plot(cells))
+  expect_error(plot(cells), NA)
 })

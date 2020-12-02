@@ -63,9 +63,10 @@ simProjWiz <- function(thepoints,thecentre,returnV="S"){
   } else {
     CRSstring <- paste("+proj=laea +lat_0=", thecentre[1]," +lon_0=", thecentre[2], " +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",sep = "")
   }
-  CRS.new <- st_crs(CRSstring)
+
   #reproject
-  xysp <- st_transform(thepoints, CRS.new)
+  xysp <- st_transform(thepoints, CRSstring)
+  
   if(returnV=="SF"){return (xysp)}
   else {
     xy <- as.data.frame(st_coordinates(xysp))
