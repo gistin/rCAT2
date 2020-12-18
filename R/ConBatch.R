@@ -29,7 +29,7 @@
 #' @param it if aooMin=TRUE this determines the number of iterations it will run to find aooMin (default=1296)
 #' @param returnV switches to return different sets of results: \cr
 #' S = simple returns a dataframe of results = (taxa ,Number of points,EOO in km2, Simple AOO in km2,Minimum AOO, EOO category, AOOcategory, Cellwidth, projection parameters) \cr
-#' SF = simple features dataframe will all results, taxa in taxa field, geometryclass=(EOO,AOO,points). NB all points will be projected together and aooMin is ignored
+#' SF = simple features dataframe will all results, taxa in taxon field, type=(EOO,AOO,points). NB all points will be projected together and aooMin is ignored
 #' 
 #' 
 #' 
@@ -52,9 +52,9 @@
 #'resultsf <- conBatch(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
 #'#plot all the EOO results
 #'library(ggplot2)
-#'ggplot(data=resultsf[resultsf$geom_cat=="eoo",]) + geom_sf(fill=NA)
+#'ggplot(data=resultsf[resultsf$type=="eoo",]) + geom_sf(fill=NA)
 #'#pullone species and plot
-#'oneSp <- resultsf[resultsf$taxa=="aa",]
+#'oneSp <- resultsf[resultsf$taxon=="aa",]
 #'ggplot(data=oneSp) + geom_sf(fill=NA)
 
 #' @references 

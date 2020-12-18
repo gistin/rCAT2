@@ -46,8 +46,8 @@
 #' @seealso \code{\link{subLocRapoport}} Rapoport's mean propinquity methods
 #'
 eMST <- function (thepoints){
-  crs <- attr(thepoints, "crs")
-  
+  crs <- attr(thepoints,'crs')
+  thepoints <- thepoints[,c('X','Y')]
   edges <- nrow(thepoints) - 1
   cmst <- ComputeMST(thepoints, verbose=FALSE)
   cmst <- cmst[1:edges, 3:5] #drops the last point and the X/Y's
@@ -155,8 +155,8 @@ subLocRapoport <- function(thepoints,barrierDis,bufferDis,returnV='S'){
   } else if (returnV == 'AREA') {
     parea <- st_area(pop_poly)
     
-    if (is.null(attr(area, "units"))) {
-      area <- area / 1e6
+    if (is.null(attr(parea, "units"))) {
+      parea <- parea / 1e6
     }
     
     units(parea) <- "km^2"

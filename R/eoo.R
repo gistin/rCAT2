@@ -1,5 +1,5 @@
 #TODO
-#sort out EOO min
+#sort out EOO min to deal with small EOO where it overlaps
 
 ##########################################################
 #calculates a possible solution for min and max EOO from a set of points and error
@@ -22,8 +22,8 @@
 #' @param returnV switch to return different sets of results: \cr
 #' S = Simple, returns just the minimum area in km2, (DEFAULT) \cr
 #' EX = returns list for two areas -  near minimum and near maximum area for reference \cr
-#' SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format \cr 
-#' SFA = returns a list of simple features with both the near minimum polygon and near maximum as a simple feature for mapping, plotting in ggplot or export to GIS systems
+#' SF = returns a polygon simple feature of the minimum EOO, for mapping, plotting in ggplot/plot or to export to a GIS format \cr 
+#' SFA = returns simple features with both the near minimum polygon (1) and near maximum (2) as a simple feature for mapping, plotting in ggplot or export to GIS systems
 #' 
 #' @return float_value area in km2 EOO polygon or sf polygon
 #' @examples
@@ -58,8 +58,8 @@
 #'eooplot
 #'#get the max as well
 #'eooboth <- eooMin(thepoints,'R',,"SFA")
-#'#add to plot
-#'eooplot <- eooplot + geom_sf(data=eooboth$max,fill=NA,col='blue')
+#'#add max to plot
+#'eooplot <- eooplot + geom_sf(data=eooboth$geometry[2],fill=NA,col='blue')
 #'eooplot
 #'###################
 #'#with a content error radius
@@ -221,7 +221,7 @@ constructPolygon <- function(x, y, crs){
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 
 eoo <- function(points, returnV="S") {
-  if (! "X" %in% colnames(thepoints) | ! "Y" %in% colnames(thepoints)) {
+  if (! "X" %in% colnames(points) | ! "Y" %in% colnames(points)) {
     stop("Point coordinates must be supplied in columns named 'X' and 'Y'.")
   }
   

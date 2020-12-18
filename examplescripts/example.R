@@ -1,3 +1,5 @@
+#TD EOOMin not quite returning what I expect
+
 ############################
 #introductory examples
 ###########################
@@ -99,7 +101,7 @@ maxpoly <- buildCellPolys_rxy(ppts,2000,maxgrid$rotation,maxgrid$xshift,maxgrid$
 myplot + geom_sf(data=maxpoly, fill="#FF000044",colour='red')
 #OK it was not that much fun, but you get the idea
 #report
-paste("Default grid give", nrow(simpleaoopoly), "cells. Minimum grid gave", nrow(minfixaoo), "cells Whilst max grid gave", nrow(maxpoly),"cells")
+paste("Default grid give", length(simpleaoopoly), "cells. Minimum grid gave", length(minfixaoo), "cells Whilst max grid gave", length(maxpoly),"cells")
 
 ############################
 #AOO with shift and rotation
@@ -131,7 +133,7 @@ minpolyrots <- buildCellPolys_rxy(ppts,2000,mingrids$rotation,mingrids$xshift,mi
 ggplot (data=maxpolyrot) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=minpolyrots, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
 
 #report
-paste("first iterations gave", nrow(minpoly),". Second with x10 iterations gave", nrow(minpolyrots),". Max was", nrow(maxpolyrots))
+paste("first iterations gave", length(minpoly),". Second with x10 iterations gave", length(minpolyrots),". Max was", length(maxpolyrots))
 
 ############################
 #AOO using point buffer method
@@ -160,9 +162,9 @@ eoo(ppts)
 #report area
 eooMin(ppts,defaultRadius = 1000)
 eoopolys <- eooMin(ppts,defaultRadius = 1000, returnV="SFA")
-ggplot (data=eoopolys$max) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
+ggplot (data=eoopolys$geometry[2]) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$geometry[1], fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
 #report, note getting area from st_area which is in m2
-paste("Standard EOO:", eoo(ppts), "Min EOO:",st_area(eoopolys$min)/1000000,"Max EOO:",  st_area(eoopolys$max)/1000000)
+paste("Standard EOO:", eoo(ppts), "Min EOO:",eoopolys$eoo[1],"Max EOO:",  eoopolys$eoo[2])
 
 #and with some variable error ratings between 0 and 3 km
 errorv <- runif (nrow(ppts),0,3000)
@@ -174,8 +176,10 @@ ps <- st_as_sf(ppts,coords=c('X','Y'))
 psbuff <- st_buffer(ps,ps$error)
 #need to set the projection
 st_crs(psbuff) <- st_crs(attr(ppts,'crs'))
-
-ggplot (data=eoopolys$max) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
+#plot max
+ggplot (data=eoopolys$geometry[2]) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
+#plot min
+ggplot (data=eoopolys$geometry[1]) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
 
 #################################
 #looking at subpops / locations
@@ -284,9 +288,9 @@ resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
 resultsf <- batchCon(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
 
 #plot all the EOO results
-ggplot(data=resultsf[resultsf$geom_cat=="eoo",]) + geom_sf(fill=NA)
+ggplot(data=resultsf[resultsf$type=="eoo",]) + geom_sf(fill=NA)
 #pull one species and plot
-oneSp <- resultsf[resultsf$taxa=="aa",]
+oneSp <- resultsf[resultsf$taxon=="aa",]
 ggplot(data=oneSp) + geom_sf(fill=NA)
 
 

@@ -1,0 +1,209 @@
+---
+title: "rCAT: Species Conservation Assessment tools in R:"
+author: "Justin Moat"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rCAT}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Vignette Info
+
+Version 0.1. JM just getting his ideas together
+
+## Index
+
+
+1. Introduction
+- 1.1 brief History of development
+2. Setup
+3. Obtaining occurrence data 
+- 3.1 GBIF
+- 3.2 CVS
+- 3.3  Example datasets
+4. Quick walk-through (just to get you started)
+5. Worked example for one species (from data to assessment to IUCN)
+6. Routines in detail
+- 6.1  Simulated datasets
+- 6.2  Data check
+- 6.3  Projecting you data
+- 6.4  EOO
+- 6.5  AOO
+- 6.6  Sub-populations/number of locations
+- 6.7  Batch processing
+- 6.8  Other routines
+7. Conclusion
+8. Acknowledgments
+9. References
+  
+## 1. Introduction
+
+
+### 1.1 Brief history
+
+- 2003, first tool produced for ArcView 3.0 as used in Willis et al. 2003
+- 2007, public release of cats.avx = Extension for ESRI ArcView 3.1 (Moat. 2007)
+- 2011, release of GeoCAT online tools geocat.kew.org (Bachman et al 2011)
+- 2017, release of rCAT 1.5
+- 2020, minor update to rCAT 1.6
+- 2020, major update to rCAT 2.0  
+
+## 2. setup
+
+Major release versions are on cran
+```
+install.packages('rCAT')
+
+```
+
+To install the development version from github you will need devtools package
+```
+install.packages('devtools')
+devtools::install_github("gistin/rCAT")
+#this will fail until it's opened up
+```
+
+## 3. Obtaining occurance data
+
+The routines in this package are driven in the main by point occurrence data. This data is generally in latitude and longtitude data. 
+
+### 3.1 GBIF data
+
+One of the major repositories for this data is [GBIF] (https://www.gbif.org/). [rgbif] (https://cran.r-project.org/web/packages/rgbif/index.html) is an excellent package to get access to this data.
+```
+install.packages('rgbif')
+
+```
+
+### 3.2 CSV data
+r can except comma-separted values (csv) files as well as many other text file formats. This format can be download from many resources or readily exported from excell.
+
+```
+df <- read.csv
+```
+
+### 3.3 Example dataset
+
+We have supplied a number of test datasets, this are for fictional species
+
+#### 3.3.1 Polar species
+#### 3.3.2 Pan tropical species
+#### 3.3.3. Dateline species
+#### 3.3.4.1 African continental species
+#### 3.3.4.2 American continental species
+#### 3.3.4.2 American continental species
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+## 4. Quick walkthrough
+
+```{r, message=FALSE,fig.show='hold'}
+#Prepare your data
+#In this case we'll make some data for Cyprus
+library(rCAT)
+library(sf)
+library(ggplot2)
+Cyprus <-   tdwg3[tdwg3$LEVEL3_COD=="CYP",]
+pts <- as.data.frame(st_coordinates(st_sample(Cyprus,29)))
+#set names to lat long
+names(pts) <- c('long','lat')
+#simple plot of this
+ggplot(data=Cyprus) + geom_sf() + geom_point(data=pts,aes(long,lat))
+#project your points into something useful i.e. not lat long
+#project and center point are automatically set by the wizard
+#you can set the center your self ie propts <- simProjWiz(pts,c(33.25,34),returnV='S')
+##TD seems to set lat_ts = 0 it should be the centre or maybe not check original reference, I don't think it matters for equatorial projections, as it's just a shift
+thepoints <- simProjWiz(pts,returnV='S')
+thepointsSF <- simProjWiz(pts,returnV='SF')
+#check project details are stored
+attr(thepoints,'crs')
+#lets check the EOO, it should be approximately the area of Cyprus's ~ 9,000 km2
+eoo(thepoints)
+#plot this
+eeoploy <- eoo(thepoints,"SF")
+cplot <- ggplot(data=Cyprus) + geom_sf() + geom_sf(data=thepointsSF) + geom_sf(data=eeoploy,fill=NA,col='green')
+cplot
+#EOO rating
+ratingEoo(eoo(thepoints))
+#get AOO should be ~ 116 km2
+aoo(thepoints)
+#get AOO as cell polygons
+aoopolys <- aoo(thepoints,2000,"SF")
+#plot it
+eooaooplot <- cplot + geom_sf(data=aoopolys,fill=NA,col='red')
+eooaooplot
+#get rating from aoo
+ratingAoo(aoo(thepoints),FALSE)
+```
+
+
+### 6.1 
+```{r, message=FALSE,fig.show='hold'}
+library(rCAT)
+plot(ptsSquare(100,1000),asp=1)
+plot(ptsNormal(100,1000),asp=1)
+```
+
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+
+## Old Stuff
+
+[Old pdf for an introduction to this package](https://github.com/gistin/rCAT1/blob/master/vignettes/rCAT.pdf)
