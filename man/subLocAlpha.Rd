@@ -30,7 +30,7 @@ Calculates the number of Sub-population or  locations using the alpha hull metho
 \note{
 Malin et al 2010 suggest barrier width of 1/10 the longest distance.
 
-As the barrier distance increases for Alpha hulls, point become outliners with no area. This algorithm returns the number of grouped points (in the hull) and the number of these outlying points for the sub population or location calculations. 
+As the barrier distance increases for Alpha hulls, point become outliers with no area. This algorithm returns the number of grouped points (in the hull) and the number of these outlying points for the sub population or location calculations. 
 We would not recommend using Alpha hulls for sub populations or locations, but it is supplied here for consistency and for those that want to experiment.
 }
 \examples{

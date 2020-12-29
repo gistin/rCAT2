@@ -4,14 +4,14 @@
 \alias{eoo}
 \title{Extent of Occurrence (EOO) Area}
 \usage{
-eoo(thepoints, returnV = "S")
+eoo(points, returnV = "S")
 }
 \arguments{
-\item{thepoints}{dataframe of points in metres i.e. c(x,y)}
-
 \item{returnV}{switch to return different sets of results: \cr
 S = Simple, returns just the minimum area in km2, (DEFAULT) \cr
 SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format}
+
+\item{thepoints}{dataframe of points in metres i.e. c(x,y)}
 }
 \value{
 float_value area of EOO polygon or sf polygon

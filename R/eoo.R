@@ -1,5 +1,6 @@
 #TODO
 #sort out EOO min to deal with small EOO where it overlaps
+#check eooError normal distribution SD distribution I maybe out by x2 (as I make -ve values positive)
 
 ##########################################################
 #calculates a possible solution for min and max EOO from a set of points and error
@@ -239,7 +240,7 @@ eoo <- function(points, returnV="S") {
   }
 } 
 
-#depreciated but kept for compatabity with rCAT 1.6
+#depreciated but kept for compatibility with rCAT 1.6
 
 EOOarea <- function(thepoints) {
   EOOpolyid <- chull(thepoints)
@@ -250,3 +251,133 @@ EOOarea <- function(thepoints) {
   return(harea)
 }
 
+
+#' @title Extent of occurrence (EOO) from a set of points - accounting for uncertainty
+#'
+#' @description Calculates the extent of occurrence (EOO) for a set of points using a minimum convex polygon. 
+#' Takes into account uncertainty in the point data due to georeference or identification uncertainty
+#' Error buffers are drawn with a set buffer distance for all points or a user defined distance for each point. 
+#' Minimum, maximum, average and standard deviation are calculated by repeated uniform sampling within each error buffer
+#' Uncertainty can also calculated for points that are deemed uncertain 
+#' @note
+#' NB: You can choose between normal and uniform distribution. In most case uniform should suffice, 
+#' but if you know your data is normal with a confidence interval this can be used. Examples would be GPS data where accuracy is usually quoted to 95%. 
+#' i.e. GPS readings before 2000 are generally to 100m accuracy with 95\% (2 SD), after 2000 10m or better with 95\% accuracy.
+#' \cr \cr
+#' NB: the default accuracy of 2km (2000m) is a general accuracy for point data from gazetteers, this is high for some, you may want to tweak this (ie 5000m)
+#' \cr \cr
+#' NB: Whilst this routine give a minimum EOO value based on accuracy of point data, use this with great caution and review the whole range of EOO values. 
+#' Points with very high inaccuracies will give highly variable EOO areas and the minimum EOO maybe meaningless in this context (i.e. if errors are very large you can achieved minimum EOO approaching zero)
+#' \cr \cr
+#' BETA: Needs full testing and assumptions of normal distribution of point error needs testing \cr
+#' 
+#' @author Steven Bachman S.Bachman@kew.org
+#' @author Justin Moat. J.Moat@kew.org
+#' @param thepoints dataframe of points in metres i.e. c(x,y)
+#' @param errorfield error field or default error radius in metres (default=2000m)
+#' @param reps number of replicates. Default = 1000
+#' @param distype distribution type either uniform or normal. Default = uniform
+#' @param sd if normal distribution then SD of the error N.B. 1 = 65\%, 2=95\%, 3=99.7\% 0 for uniform. Default = 2 (95\%)
+#' @param returnV switch to return different sets of results:\cr
+#' S = Simple, returns just the area ranges (Min, 1st Qu. ,Median ,Mean ,3rd Qu. ,Max) in km2, (DEFAULT) \cr
+#' ALL = Return all the EOO values as a vector, useful for histograms etc \cr
+#' SF = returns a multipolygon simple feature, for all EOO calculations. For mapping, plotting in ggplot/plot or to export to a GIS format
+#' @return default is a vector of float_value area of EOO polygons in km2
+#' @seealso \code{\link{ratingEoo}} for EOO Ratings
+#' @export
+#' @importFrom grDevices chull
+#' @importFrom pracma polyarea
+#' @import sf
+#' @references
+#' Bachman, S., Moat, J., Hill, A.W., de Torre, J., Scott, B., 2011. Supporting Red List threat assessments with GeoCAT: geospatial conservation assessment tool. Zookeys 126, 117–26. doi:10.3897/zookeys.150.2109 
+#' 
+#' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
+#' 
+#' @examples
+#' library(rCAT)
+#' library(sf)
+#' library(ggplot2)
+#' 
+#' #construct an oval of point for testing
+#'thepoints <- ptsOval(19,0.5,deg2rad(45),0.5)
+#'names(thepoints) <- c("lat","long")
+#'#project the points
+#'thepoints <- simProjWiz(thepoints)
+#'#check crs
+#'attr(thepoints,'crs') 
+#'#add some random errors between 0-5000m
+#'thepoints$R <- runif(nrow(thepoints),0,5000)
+#'#buffer them so you can view
+#'ps <- st_as_sf(thepoints,coords=c('X','Y'))
+#'psbuff <- st_buffer(ps,ps$R)
+#'#normal EOO
+#'eooPoly <- eoo(thepoints,"SF")
+#'#set projection of bufferpoints
+#'st_crs(psbuff) <- st_crs(eooPoly)
+#'eooplot <- ggplot(data=eooPoly) + geom_sf(color="black",fill="green") + geom_sf(data=psbuff) 
+#'eooplot
+#'#eoo area
+#'eoo(thepoints)
+#'#eoo range using accuracy values
+#'summaryEOO <- eooError(thepoints,error=thepoints$R)
+#'#eoo range using a default accuracy of 2 km
+#'summaryEOO <- eooError(thepoints)
+#'
+#'#more reps
+#'summaryEOO <- eooError(thepoints,thepoints$R,reps=10000)
+#'#get values for histogram
+#'valuesEOO <- eooError(thepoints,thepoints$R,returnV="ALL")
+#'hist(valuesEOO)
+#'
+#'#get simple features for plotting
+#'sfeoo <- eooError(thepoints,thepoints$R,returnV = "SF")
+#'#plot the smallest and largest returned
+#'mineoopoly <- sfeoo[sfeoo$area == min(sfeoo$area)]
+#'maxeoopoly <- sfeoo[sfeoo$area == max(sfeoo$area)]
+#'eooplot + geom_sf(data=mineoopoly,fill=NA,color="dark green")+ geom_sf(data=maxeoopoly,fill=NA,color="red")   
+#'
+#'#other examples
+#'#assuming error is 100m at 95% accuracy ie GPS before 2000
+#'summaryEOO <- eooError(thepoints,error=100, distype = "normal", sd=2) 
+
+#############################
+eooError <-function(thepoints,error=2000,reps=1000,distype='uniform',sd=0,returnV='S'){
+  #build x,y,error
+  thepoints$error <- error
+  results <- replicate(n = reps, error_rad_area(thepoints,distype,sd,returnV))
+  if (returnV == 'S'){ 
+    return(summary(results))
+  } else if (returnV == 'ALL'){
+    return(results)
+  } else {
+    #message('hit')
+    eoos <- st_as_sfc(results,crs=attr(thepoints,'crs'))
+    eoos$area <- st_area(eoos)/1000000
+    return (eoos)
+  }
+  
+}
+
+#function to build a set of random points with X,Y and within Error radius and return the area of the EOO
+error_rad_area <- function(thepoints,distype='uniform',sd,returnV){
+  phi <- runif(nrow(thepoints),0,2*pi) #angle
+  if (distype=='normal'){
+    rho <- abs(rnorm(nrow(thepoints)))
+    X <- (sqrt(rho) * cos(phi)) * thepoints$error/sd + thepoints$X
+    Y <- (sqrt(rho) * sin(phi)) * thepoints$error/sd + thepoints$Y
+    
+  } else { #uniform
+    rho <- runif(nrow(thepoints),0,1)#distance factor
+    X <- ((sqrt(rho) * cos(phi)) * thepoints$error) + thepoints$X
+    Y <- (sqrt(rho) * sin(phi)) * thepoints$error + thepoints$Y
+  }
+  #get EOO
+  newp <- matrix(c(X,Y),ncol=2)
+  hull_idx <- chull(newp)
+  hull <- newp[hull_idx,]
+  if (returnV == 'SF') {
+    constructPolygon(hull[,1], hull[,2],crs=attr(thepoints,'crs')) 
+  } else {
+    -polyarea(x=hull[,1], y=hull[,2]) /1000000 # in km
+  }
+}
