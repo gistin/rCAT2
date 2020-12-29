@@ -274,7 +274,7 @@ EOOarea <- function(thepoints) {
 #' @author Steven Bachman S.Bachman@kew.org
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints dataframe of points in metres i.e. c(x,y)
-#' @param errorfield error field or default error radius in metres (default=2000m)
+#' @param error error field or default error radius in metres (default=2000m)
 #' @param reps number of replicates. Default = 1000
 #' @param distype distribution type either uniform or normal. Default = uniform
 #' @param sd if normal distribution then SD of the error N.B. 1 = 65\%, 2=95\%, 3=99.7\% 0 for uniform. Default = 2 (95\%)
