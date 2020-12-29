@@ -157,29 +157,65 @@ eoo(ppts)
 #EOO with point error
 ###############################
 
+#construct an oval of point for testing
+thepoints <- ptsOval(19,0.5,deg2rad(45),0.5)
+names(thepoints) <- c("lat","long")
+#project the points
+thepoints <- simProjWiz(thepoints)
+#check crs
+attr(thepoints,'crs') 
+#add some random errors between 0-5000m
+thepoints$R <- runif(nrow(thepoints),0,5000)
+#buffer them so you can view
+ps <- st_as_sf(thepoints,coords=c('X','Y'))
+psbuff <- st_buffer(ps,ps$R)
+#normal EOO
+eooPoly <- eoo(thepoints,"SF")
+#set projection of bufferpoints
+st_crs(psbuff) <- st_crs(eooPoly)
+eooplot <- ggplot(data=eooPoly) + geom_sf(color="black",fill="green") + geom_sf(data=psbuff) 
+eooplot
+#eoo area
+eoo(thepoints)
+#eoo range using accuracy values
+summaryEOO <- eooError(thepoints,error=thepoints$R)
+summaryEOO
+#eoo range using a default accuracy of 2 km
+summaryEOO2km <- eooError(thepoints)
+
+#more reps
+summaryEOO <- eooError(thepoints,thepoints$R,reps=10000)
+#get values for histogram
+valuesEOO <- eooError(thepoints,thepoints$R,returnV="ALL")
+hist(valuesEOO)
+
+#get simple features for plotting
+sfeoo <- eooError(thepoints,thepoints$R,returnV = "SF")
+#plot the smallest and largest returned
+mineoopoly <- sfeoo[sfeoo$area == min(sfeoo$area)]
+maxeoopoly <- sfeoo[sfeoo$area == max(sfeoo$area)]
+eooplot + geom_sf(data=mineoopoly,fill=NA,color="dark green")+ geom_sf(data=maxeoopoly,fill=NA,color="red") 
+
+#other examples
+#assuming error is 100m at 95% accuracy ie GPS before 2000
+summaryEOO <- eooError(thepoints,error=100, distype = "normal", sd=2)
+
+#eooMin which is in beta, but fast and will often get a lower EOOmin
+
+t <- eooMin(thepoints,returnV = "SF")
+emin <- eooMin(thepoints,returnV='EX')
+eooplot + geom_sf(data=mineoopoly,fill=NA,color="dark green")+ geom_sf(data=maxeoopoly,fill=NA,color="red") + geom_sf(data=t,fill=NA,color="blue")
+
+#compare
+print(paste("eooError acheived, Min:", summaryEOO[1], "Max:",summaryEOO[6]))
+print(paste("eooMin acheived, Min:", emin$min , "Max:",emin$max))
+
+
 #Looking at EOO with error incorporated
-#same data but with a content error of 1km
-#report area
-eooMin(ppts,defaultRadius = 1000)
 eoopolys <- eooMin(ppts,defaultRadius = 1000, returnV="SFA")
 ggplot (data=eoopolys$geometry[2]) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$geometry[1], fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y))
 #report, note getting area from st_area which is in m2
 paste("Standard EOO:", eoo(ppts), "Min EOO:",eoopolys$eoo[1],"Max EOO:",  eoopolys$eoo[2])
-
-#and with some variable error ratings between 0 and 3 km
-errorv <- runif (nrow(ppts),0,3000)
-ppts$error <- errorv
-eoopolys <- eooMin(ppts,errorfield = "error",returnV="SFA")
-
-#build the buffers so we can see the error circles on our plots
-ps <- st_as_sf(ppts,coords=c('X','Y'))
-psbuff <- st_buffer(ps,ps$error)
-#need to set the projection
-st_crs(psbuff) <- st_crs(attr(ppts,'crs'))
-#plot max
-ggplot (data=eoopolys$geometry[2]) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
-#plot min
-ggplot (data=eoopolys$geometry[1]) + geom_sf(fill="#FF000044",colour='red') + geom_sf(data=eoopolys$min, fill="#00ff0044",colour='green') + geom_point(data=ppts,aes(X,Y)) + geom_sf(data=psbuff, fill=NA)
 
 #################################
 #looking at subpops / locations

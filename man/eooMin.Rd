@@ -16,8 +16,8 @@ eooMin(thepoints, errorfield = "R", defaultRadius = 2000, returnV = "S")
 \item{returnV}{switch to return different sets of results: \cr
 S = Simple, returns just the minimum area in km2, (DEFAULT) \cr
 EX = returns list for two areas -  near minimum and near maximum area for reference \cr
-SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format \cr 
-SFA = returns a list of simple features with both the near minimum polygon and near maximum as a simple feature for mapping, plotting in ggplot or export to GIS systems}
+SF = returns a polygon simple feature of the minimum EOO, for mapping, plotting in ggplot/plot or to export to a GIS format \cr 
+SFA = returns simple features with both the near minimum polygon (1) and near maximum (2) as a simple feature for mapping, plotting in ggplot or export to GIS systems}
 }
 \value{
 float_value area in km2 EOO polygon or sf polygon
@@ -65,8 +65,8 @@ eooplot <- eooplot + geom_sf(data=mineoopoly,fill=NA,col='red')
 eooplot
 #get the max as well
 eooboth <- eooMin(thepoints,'R',,"SFA")
-#add to plot
-eooplot <- eooplot + geom_sf(data=eooboth$max,fill=NA,col='blue')
+#add max to plot
+eooplot <- eooplot + geom_sf(data=eooboth$geometry[2],fill=NA,col='blue')
 eooplot
 ###################
 #with a content error radius

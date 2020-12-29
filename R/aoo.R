@@ -323,7 +323,7 @@ AOOsimp <- aoo
 #' SF = returns a polygon simple feature for mapping, plotting in ggplot/plot or to export to a GIS format.
 #' @param rotation allow rotation of grids? (default = TRUE). If rotations are trigger selected iterations are shared 50:50 rotation:shift(both in x and y direction)
 #' @return dependent on switch, default is area in km2
-#' @note Number of Iteration as calculated to the nearest whole number ie round(it^0.25), so for 1296 iterations you get 36 rotations, 6 x shifts and 6 y shifts \cr
+#' @note Number of Iteration as calculated to the nearest whole number i.e. round(it^0.25), so for 1296 iterations you get 36 rotations, 6 x shifts and 6 y shifts \cr
 #' Up to 10,000 iterations (324r, 18x, 18y) is fine (slight pause), probably not worth going further unless you really really want to push for a smaller AOO (you still may not achieve it) \cr
 #' Number of point will additional increase processing time \cr
 #' If you are not interest in rotation the split is it^0.5 in x and y ie 1296:36x 36y or 104,976: 324x,324y \cr
