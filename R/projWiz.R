@@ -42,7 +42,6 @@
 #' Snyder, J.P., 1987. Map projections: A working manual, Professional Paper. Washington, D.C.
 #' @export
 #' @import sf
-#' @import rgdal
 #' 
 #' 
 
