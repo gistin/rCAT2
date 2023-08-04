@@ -1,3 +1,7 @@
+#notes:
+
+sp is being called somewhere, but really can't find it, anyhow need to remove this package
+
 # rCAT: Species Conservation assessment tools in R 
 # Version 2.0
 

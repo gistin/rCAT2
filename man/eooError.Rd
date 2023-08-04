@@ -16,6 +16,8 @@ eooError(
 \arguments{
 \item{thepoints}{dataframe of points in metres i.e. c(x,y)}
 
+\item{error}{error field or default error radius in metres (default=2000m)}
+
 \item{reps}{number of replicates. Default = 1000}
 
 \item{distype}{distribution type either uniform or normal. Default = uniform}
@@ -26,8 +28,6 @@ eooError(
 S = Simple, returns just the area ranges (Min, 1st Qu. ,Median ,Mean ,3rd Qu. ,Max) in km2, (DEFAULT) \cr
 ALL = Return all the EOO values as a vector, useful for histograms etc \cr
 SF = returns a multipolygon simple feature, for all EOO calculations. For mapping, plotting in ggplot/plot or to export to a GIS format}
-
-\item{errorfield}{error field or default error radius in metres (default=2000m)}
 }
 \value{
 default is a vector of float_value area of EOO polygons in km2

@@ -22,7 +22,8 @@ Imports:
     grDevices (>= 3.3.2),
     emstreeR,
     ggplot2,
-    lwgeom (>= 0.2-13)
+    lwgeom (>= 0.2-13),
+    dplyr
 Encoding: UTF-8
 LazyData: true
 Language: en-US

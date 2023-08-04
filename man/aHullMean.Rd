@@ -26,7 +26,7 @@ Algorithms derived from and for details of use see:
 Burgman, M. A., & Fox, J. C. (2003). Bias in species range estimates from minimum convex polygons: implications for conservation and options for improved planning. Animal Conservation, 6(1), 19-28.
 }
 \note{
-
+none
 }
 \examples{
 #Build and project some points

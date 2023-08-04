@@ -17,7 +17,7 @@
 #' SF = returns a multipolygon simple feature of the alpha hull, for mapping, plotting in ggplot or export to GIS systems \cr
 #' ALL = returns a multipolygon of all the triangular elements of the alpha hull \cr
 #' @return dependent on switch, default is area in km2 
-#' @note 
+#' @note none
 #' @examples
 #'#Build and project some points
 #'thepoints <- ptsSquare(19,0.1)

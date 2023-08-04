@@ -38,7 +38,7 @@ Please cite below if using this algorithm:
 Moat, J., Bachman, S. P., Field, R., & Boyd, D. S. (2018). Refining area of occupancy to address the modifiable areal unit problem in ecology and conservation. Conservation biology, 32(6), 1278-1289.
 }
 \note{
-
+none
 }
 \examples{
 #Build and project some points
