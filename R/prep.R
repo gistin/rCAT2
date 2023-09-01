@@ -1,4 +1,5 @@
 #data preparations scripts to help upload to IUCN etc
+#note these will need work to get them more useful
 
 ##########################################################
 #Country list from a set of points in geographic coordinates#
@@ -6,7 +7,7 @@
 #' calculates the MER of a set of numbers'
 #' @title PRE-ALPHA Country list from a set of points in geographic coordinates
 #' @description 
-#' Calculates the country occurances from a set of points in lat long
+#' Calculates the country Occurances from a set of points in lat long
 #' @author Justin Moat. J.Moat@kew.org
 #' @param thepoints dataframe of points ie c(x,y) in lat long
 #' @return list of ISO3 codes
@@ -18,7 +19,6 @@
 #' countrylist(thepoints)
 #' @import sf
 #' @import dplyr
-#' @import rnaturalearth
 #' @export
 
 
@@ -27,8 +27,7 @@ countrylist <- function(thepointsll){
   #check to see if it's been downloaded
   if (!exists('countries10')){
     countries10 <- new.env()
-    #note below does not always work, ie NE site can be down!!!
-    countries10 <- ne_download(scale = 10, type='countries', category = 'cultural', returnclass='sf')
+    countries10 <- ne_download_rcat()
   }
   thepoints <- sf::st_as_sf(thepointsll, coords = c("long", "lat"), crs = 4326)
   clist <- sf::st_intersects(thepoints,countries10)
@@ -58,3 +57,38 @@ countrylist <- function(thepointsll){
   countries = dplyr::distinct(countries)
   return(countries)
 }
+
+
+#downloads rnatural earth dataset for countries
+#borrowed but much reduced from https://github.com/ropensci/rnaturalearth/blob/master/R/ne_download.R
+
+ne_download_rcat <- function() {
+  
+  file_name <- "ne_10m_admin_0_countries"
+  address <- "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_0_countries.zip"
+  # download zip to temporary location, unzipped files are saved later
+  # tryCatch catches error, returns NUll if no error
+  download_failed <- tryCatch(
+    utils::download.file(file.path(address), zip_file <- tempfile()),
+    error = function(e) {
+      message(paste("Natural earth download failed"))
+      return(TRUE)
+    }
+  )
+  # return from this function if download error was caught by tryCatch
+  if (download_failed) {
+    return()
+  }
+  
+  #unzip it
+  utils::unzip(zip_file, exdir = tempdir())
+  #read as sf
+  sf_object <- read_sf(tempdir(), file_name)
+  library (spdep)
+  sf_object <- poly2nb(st_make_valid(sf_object))
+  return(sf_object)
+}
+
+
+
+

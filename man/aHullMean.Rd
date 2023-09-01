@@ -46,5 +46,5 @@ points(thepoints)
 Burgman, M. A., & Fox, J. C. (2003). Bias in species range estimates from minimum convex polygons: implications for conservation and options for improved planning. Animal Conservation, 6(1), 19-28.
 }
 \author{
-Justin Moat. J.Moat@kew.org
+Justin Moat. J.Moat@kew.org Steve Bachman S.Bachman@kew.org
 }

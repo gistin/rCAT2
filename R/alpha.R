@@ -9,7 +9,7 @@
 #' Processing time for large dataset will be slow. Uses sf's st_triangulate initially to build Delaunay triangulation of all points. 
 #' Algorithms derived from and for details of use see: 
 #' Burgman, M. A., & Fox, J. C. (2003). Bias in species range estimates from minimum convex polygons: implications for conservation and options for improved planning. Animal Conservation, 6(1), 19-28.
-#' @author Justin Moat. J.Moat@kew.org
+#' @author Justin Moat. J.Moat@kew.org Steve Bachman S.Bachman@kew.org
 #' @param thepoints dataframe of points in metres i.e. c(x,y)
 #' @param multiple multiple of the mean distance between point pairs, used to remove triangles from the set of Delaunay triangulations (default=2)
 #' @param returnV, switches to return different sets of results: \cr

@@ -13,7 +13,7 @@ countrylist(thepointsll)
 list of ISO3 codes
 }
 \description{
-Calculates the country occurances from a set of points in lat long
+Calculates the country Occurances from a set of points in lat long
 }
 \details{
 calculates the MER of a set of numbers'
