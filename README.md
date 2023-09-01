@@ -1,6 +1,7 @@
 #notes:
 
-sp is being called somewhere, but really can't find it, anyhow need to remove this package
+Need to update with Steve's country work from https://github.com/gistin/rCAT2/tree/update_countrylist_function https://github.com/gistin/rCAT2/blob/update_countrylist_function/R/countrylist.R https://github.com/gistin/rCAT2/blob/update_countrylist_function/R/get_ne.R https://github.com/gistin/rCAT2/blob/update_countrylist_function/R/get_tdwgl3.R https://github.com/gistin/rCAT2/blob/update_countrylist_function/R/prep.R https://github.com/gistin/rCAT2/blob/update_countrylist_function/R/prep_countries_data.R https://github.com/gistin/rCAT2/blob/update_countrylist_function/R/tdwglist.R
+
 
 # rCAT: Species Conservation assessment tools in R 
 # Version 2.0
