@@ -39,13 +39,13 @@ Further improvements to the tool will be included in future releases, if you wis
 
 ### 1.0.3 Installing
 
-Release versions are on cran
+Release versions are on cran. Note below is the old version and just for reference
 ```
 install.packages('rCAT')
 
 ```
+This major update is not on CRAN yes but you can install the development version from GitHub with (you will need the devtools package):
 
-To install the development version from github you will need devtools package
 ```
 install.packages('devtools')
 devtools::install_github("gistin/rCAT")
