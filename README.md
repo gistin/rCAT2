@@ -48,7 +48,7 @@ This major update is not on CRAN yes but you can install the development version
 
 ```
 install.packages('devtools')
-devtools::install_github("gistin/rCAT")
+devtools::install_github("gistin/rCAT2")
 #this will fail until it's opened up
 ```
 
