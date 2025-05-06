@@ -6,8 +6,10 @@
 #' @title Batch process, preliminary conservation assessments
 #' @description 
 #' Combines the main of routines in rCAT to process multiple species for AOO, EOO etc.
-#' @author Justin Moat. J.Moat@kew.org
+#' @author Justin Moat. J.Moat@kew.org 
+#' @author Steve Bachman 
 #' @note Has a switch to either project all data as a whole or each taxa separately. We would suggest you use this switch if data is all from a similar area (i.e. all from one continent/country/region)
+#' @note This is in Alpha, please check results, any issues please report
 #' @details This function expects a list of taxa and latitudes and longitudes.ie\cr
 #' \tabular{lll}{
 #' species_w \tab 85.388000  \tab   84.33100\cr 
@@ -75,7 +77,7 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
   points <- data.frame(lat, long)
   
   if (project2gether) {
-    points <- simProjWiz(points)
+    points <- rCAT::simProjWiz(points)
   }
   
   split_points <- split(points, f=taxa)
@@ -96,7 +98,7 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
     )
     
     results <- st_sf(
-      taxon=rep(unique(taxa), 3),
+      taxon=rep(unique(taxa_names), 3),
       type=c(rep("eoo", ntaxa), rep("aoo", ntaxa), rep("points", ntaxa)),
       geometry=geoms
     )
@@ -111,26 +113,27 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
     }
     
     n_points <- lapply(split_points, nrow)
-    eoo_areas <- lapply(split_points, eoo)
-    eoo_ratings <- lapply(eoo_areas, ratingEoo)
-    aoo_areas <- lapply(split_points, function(p) aoo(p, cellsize))
+    eoo_areas <- lapply(split_points, rCAT::eoo)
+    eoo_ratings <- lapply(eoo_areas, rCAT::ratingEoo)
+    aoo_areas <- lapply(split_points, function(p) rCAT::aoo(p, cellsize))
     
     if (aooMin) {
       min_aoo_areas <- lapply(split_points, function(p) aooFixedRotation(p, cellsize, it))
-      aoo_ratings <- lapply(min_aoo_areas, ratingAoo)
+      aoo_ratings <- lapply(min_aoo_areas, rCAT::ratingAoo)
     } else {
-      aoo_ratings <- lapply(aoo_areas, ratingAoo)
+      aoo_ratings <- lapply(aoo_areas, rCAT::ratingAoo)
     }
     
     results <- data.frame(
-      taxon=unique(taxa),
+      taxon=unique(taxa_names),
       NOP=do.call(c, n_points),
       EOOkm2=do.call(c, eoo_areas),
       AOOkm=do.call(c, aoo_areas),
       EOOcat=do.call(c, eoo_ratings),
       AOOcat=do.call(c, aoo_ratings),
       cellwidth=cellsize,
-      proj_metadata=proj_strings
+      proj_metadata=proj_strings,
+      row.names = NULL
     )
     
     if (aooMin) {
