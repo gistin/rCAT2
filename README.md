@@ -44,7 +44,7 @@ Release versions are on cran. Note below is the old version and just for referen
 install.packages('rCAT')
 
 ```
-This major update is not on CRAN yes but you can install the development version from GitHub with (you will need the devtools package):
+This major update is not on CRAN yet but you can install the development version from GitHub with (you will need the devtools package):
 
 ```
 install.packages('devtools')
