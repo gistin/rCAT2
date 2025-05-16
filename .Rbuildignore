@@ -4,3 +4,6 @@ extdata
 README.md
 ^data-raw$
 ^examplescripts$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
