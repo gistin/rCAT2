@@ -98,7 +98,7 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
     )
     
     results <- st_sf(
-      taxon=rep(unique(taxa_names), 3),
+      taxon=rep(unique(taxa), 3),
       type=c(rep("eoo", ntaxa), rep("aoo", ntaxa), rep("points", ntaxa)),
       geometry=geoms
     )
@@ -125,7 +125,7 @@ batchCon <- function(taxa,long,lat,project2gether=TRUE,cellsize=2000,aooMin=FALS
     }
     
     results <- data.frame(
-      taxon=unique(taxa_names),
+      taxon=unique(taxa),
       NOP=do.call(c, n_points),
       EOOkm2=do.call(c, eoo_areas),
       AOOkm=do.call(c, aoo_areas),
