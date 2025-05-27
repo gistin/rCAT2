@@ -204,9 +204,9 @@ constructPolygon <- function(x, y, crs){
 #' @return float_value area of EOO polygon or sf polygon
 #' @note area returned is in x,y units, but negative as polygon is constructed anticlockwise
 #' @examples
-#' x <- runif (20,0,10)
-#' y <- runif (20,0,10)
-#' df <- data.frame(x,y) 
+#' X <- runif (20,0,10)
+#' Y <- runif (20,0,10)
+#' df <- data.frame(X,Y) 
 #' eoo (df)
 #' #######
 #' spoly <- eoo (df,TRUE)
@@ -225,14 +225,23 @@ eoo <- function(points, returnV="S") {
   if (! "X" %in% colnames(points) | ! "Y" %in% colnames(points)) {
     stop("Point coordinates must be supplied in columns named 'X' and 'Y'.")
   }
-  
   hull_idx <- chull(points)
   hull <- points[hull_idx,]
   
   area <- polyarea(x=hull$X, y=hull$Y)
   # hull is constructed backwards, so area is negative and in m^2
   area <- -1 * area / 1e6
-  
+  #check if area is truly NA or just one point
+  if (is.na(area)){
+    print("hit")
+    if(nrow(unique(df)) < 2){
+      area = 0
+    }
+  }
+  if (nrow(unique(df)) == 0){
+    area = NA
+  }
+  #returns results
   if (returnV == "S") {
     area
   } else {

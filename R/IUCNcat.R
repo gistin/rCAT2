@@ -30,13 +30,15 @@
 #' Joppa, L.N., Butchart, S.H.M., Hoffmann, M., Bachman, S.P., Akçakaya, H.R., Moat, J.F., Böhm, M., Holland, R.A., Newton, A., Polidoro, B., Hughes, A., 2016. Impact of alternative metrics on estimates of extent of occurrence for extinction risk assessment. Conserv. Biol. 30, 362–370. doi:10.1111/cobi.12591
 
 ratingEoo <- function(EOOArea,abb=TRUE){
-#  EOOArea <- 250
-#  abb <- FALSE
+  #  EOOArea <- 250
+  #  abb <- FALSE
   #make positive
   EOOArea <- sqrt(EOOArea * EOOArea)
   cat <- NA
   if (identical(abb,FALSE)){
-    if (EOOArea < 100){
+    if (is.na(EOOArea)) {
+      cat <- "Data Deficient"
+    } else if (EOOArea < 100){
       cat <- "Critically Endangered"
     } else if (EOOArea < 5000){
       cat <- "Endangered"
@@ -48,16 +50,18 @@ ratingEoo <- function(EOOArea,abb=TRUE){
       cat <- "Least Concern"
     
   } else {
-  if (EOOArea < 100){
-    cat <- "CR"
-  } else if (EOOArea < 5000){
-    cat <- "EN"
-  } else if (EOOArea < 20000){
-    cat <- "VU"
-  } else if (EOOArea < 30000){
-    cat <- "NT"
-  } else
-    cat <- "LC"
+    if (is.na(EOOArea)){
+      cat <- "DD"
+    } else if (EOOArea < 100){
+      cat <- "CR"
+    } else if (EOOArea < 5000){
+      cat <- "EN"
+    } else if (EOOArea < 20000){
+      cat <- "VU"
+    } else if (EOOArea < 30000){
+      cat <- "NT"
+    } else
+      cat <- "LC"
   }
   return (cat)
 }

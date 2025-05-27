@@ -44,14 +44,14 @@
 #'mydata <- data.frame(taxa=c('aa','bb','cc','dd',"xx"),lat,long)
 #'
 #'#default get a dataframe of results and project all with the same project
-#'resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat)
+#'resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat)
 #'#project each species individually
-#'resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,project2gether = FALSE)
+#'resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat,project2gether = FALSE)
 #'#switch on aooMin
-#'resultsdf <- conBatch(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
+#'resultsdf <- batchCon(mydata$taxa,mydata$long,mydata$lat,aooMin=TRUE)
 #'
 #'#default to return Simple feature objects
-#'resultsf <- conBatch(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
+#'resultsf <- batchCon(mydata$taxa,mydata$long,mydata$lat,returnV = "SF")
 #'#plot all the EOO results
 #'library(ggplot2)
 #'ggplot(data=resultsf[resultsf$type=="eoo",]) + geom_sf(fill=NA)
