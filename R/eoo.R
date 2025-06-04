@@ -234,11 +234,11 @@ eoo <- function(points, returnV="S") {
   #check if area is truly NA or just one point
   if (is.na(area)){
     print("hit")
-    if(nrow(unique(df)) < 2){
+    if(nrow(unique(points)) < 2){
       area = 0
     }
   }
-  if (nrow(unique(df)) == 0){
+  if (nrow(unique(points)) == 0){
     area = NA
   }
   #returns results
